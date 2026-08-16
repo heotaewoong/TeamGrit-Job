@@ -1,0 +1,16 @@
+{
+  "name": "heobrain-coupon-order-test",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "HeoBrain Store - 쿠폰 적용 주문 결제 흐름 단위테스트 (Task A-3)",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "server-only": "^0.0.1",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}
