@@ -7,7 +7,11 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals"],
+    "baseUrl": ".",
+    "paths": {
+      "server-only": ["./test/empty-module.ts"]
+    }
   },
-  "include": ["src"]
+  "include": ["src", "real"]
 }

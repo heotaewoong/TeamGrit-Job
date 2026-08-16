@@ -3,13 +3,18 @@
   "private": true,
   "type": "module",
   "version": "0.1.0",
-  "description": "HeoBrain Store - 쿠폰 적용 주문 결제 흐름 단위테스트 (Task A-3)",
+  "description": "HeoBrain Store - 쿠폰 적용 주문 결제 흐름 단위테스트/인수테스트 (Task A-3, A-4)",
   "scripts": {
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:bdd": "node --import tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js"
   },
   "devDependencies": {
+    "@cucumber/cucumber": "^13.2.1",
+    "@supabase/supabase-js": "^2.45.4",
+    "@types/node": "^22.9.0",
     "server-only": "^0.0.1",
+    "tsx": "^4.23.12",
     "typescript": "^5.6.3",
     "vitest": "^2.1.4"
   }
