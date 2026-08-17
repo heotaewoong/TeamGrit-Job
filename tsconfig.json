@@ -10,8 +10,8 @@
     "types": ["vitest/globals"],
     "baseUrl": ".",
     "paths": {
-      "server-only": ["./test/empty-module.ts"]
+      "server-only": ["./task-a3-unit-tests/test-support/empty-module.ts"]
     }
   },
-  "include": ["src", "real"]
+  "include": ["task-a3-unit-tests", "task-a4-bdd-tests"]
 }

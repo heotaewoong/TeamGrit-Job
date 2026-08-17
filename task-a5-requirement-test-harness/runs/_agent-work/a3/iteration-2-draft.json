@@ -1,0 +1,126 @@
+{
+  "requirement_hash": "a3c0ffee1234",
+  "iteration": 2,
+  "generator_session_id": "gen-a5-refine-2-session",
+  "generator_model": "gpt-5.6-sol",
+  "unit_tests": [
+    {
+      "id": "UT-A3-DISCOUNT-MATRIX",
+      "title": "정률과 정액 할인액을 계산하고 상품 금액을 넘지 않는다",
+      "requirement_ids": ["REQ-A3-DISCOUNT", "REQ-A3-MOCK"],
+      "system_under_test": "calculateCouponDiscount",
+      "arrange": ["10000원 소계", "20% 정률 또는 15000원 정액 쿠폰"],
+      "act": "실제 calculateCouponDiscount를 호출한다.",
+      "assertions": [{"actual": "정률 할인액", "matcher": "toBe", "expected": 2000}, {"actual": "정액 할인액", "matcher": "toBe", "expected": 10000}],
+      "mocks": []
+    },
+    {
+      "id": "UT-A3-MAXIMUM-MATRIX",
+      "title": "정률과 정액 쿠폰 모두 숫자 및 0원 maximum_discount를 적용한다",
+      "requirement_ids": ["REQ-A3-CAP"],
+      "system_under_test": "calculateCouponDiscount",
+      "arrange": ["10000원 소계", "정률 50% 또는 정액 5000원", "maximum_discount 2000원 또는 0원"],
+      "act": "네 조합에 실제 calculateCouponDiscount를 호출한다.",
+      "assertions": [{"actual": "2000원 한도 결과", "matcher": "toBe", "expected": 2000}, {"actual": "0원 한도 결과", "matcher": "toBe", "expected": 0}],
+      "mocks": []
+    },
+    {
+      "id": "UT-A3-INPUT-GUARDS",
+      "title": "빈 코드와 비로그인 요청을 DB 조회 전에 거절한다",
+      "requirement_ids": ["REQ-A3-INPUT"],
+      "system_under_test": "validateCouponCode",
+      "arrange": ["공백 코드/로그인 사용자", "SAVE 코드/빈 userId", "케이스별 새 Supabase fake"],
+      "act": "각 요청을 검증한다.",
+      "assertions": [{"actual": "공백 코드 결과", "matcher": "toEqual", "expected": {"error": "쿠폰 코드를 입력해주세요.", "status": 400}}, {"actual": "비로그인 결과", "matcher": "toEqual", "expected": {"error": "로그인이 필요합니다.", "status": 401}}, {"actual": "각 DB 조회 횟수", "matcher": "toBe", "expected": 0}],
+      "mocks": [{"target": "SupabaseClient", "reason": "DB 외부 I/O 미호출 관찰"}]
+    },
+    {
+      "id": "UT-A3-LOOKUP-FAILURES",
+      "title": "미존재와 만료 쿠폰을 정확한 사유로 거절한다",
+      "requirement_ids": ["REQ-A3-LOOKUP"],
+      "system_under_test": "validateCouponCode",
+      "arrange": ["null 쿠폰", "종료일 2026-08-16 쿠폰", "현재 시각 2026-08-17 12:00 KST"],
+      "act": "각 요청을 검증한다.",
+      "assertions": [{"actual": "미존재 결과", "matcher": "toEqual", "expected": {"error": "유효하지 않은 쿠폰 코드입니다.", "status": 404}}, {"actual": "만료 결과", "matcher": "toEqual", "expected": {"error": "만료된 쿠폰입니다.", "status": 400}}],
+      "mocks": [{"target": "SupabaseClient", "reason": "DB 응답 재현"}, {"target": "system clock", "reason": "만료 판정 고정"}]
+    },
+    {
+      "id": "UT-A3-MINIMUM-EQUAL",
+      "title": "주문 금액이 최소 주문금액과 같으면 적용한다",
+      "requirement_ids": ["REQ-A3-MINIMUM"],
+      "system_under_test": "validateCouponCode",
+      "arrange": ["정액 1000원, 최소 주문금액 10000원 쿠폰", "10000원 주문"],
+      "act": "쿠폰을 검증한다.",
+      "assertions": [{"actual": "할인 금액", "matcher": "toBe", "expected": 1000}, {"actual": "최종 금액", "matcher": "toBe", "expected": 9000}],
+      "mocks": [{"target": "SupabaseClient", "reason": "DB 응답 재현"}]
+    },
+    {
+      "id": "UT-A3-MINIMUM-BELOW",
+      "title": "최소 주문금액보다 1원 부족하면 정확한 오류로 거절한다",
+      "requirement_ids": ["REQ-A3-MINIMUM"],
+      "system_under_test": "validateCouponCode",
+      "arrange": ["정액 1000원, 최소 주문금액 10000원 쿠폰", "9999원 주문"],
+      "act": "쿠폰을 검증한다.",
+      "assertions": [{"actual": "결과", "matcher": "toEqual", "expected": {"error": "최소 주문 금액 10,000원 이상이어야 합니다.", "status": 400}}],
+      "mocks": [{"target": "SupabaseClient", "reason": "DB 응답 재현"}]
+    },
+    {
+      "id": "UT-A3-USAGE-LIMIT",
+      "title": "사용 횟수가 user_usage_limit에 도달하면 거절한다",
+      "requirement_ids": ["REQ-A3-USAGE"],
+      "system_under_test": "validateCouponCode",
+      "arrange": ["user_usage_limit 1인 정액 쿠폰", "사용 횟수 1"],
+      "act": "쿠폰을 검증한다.",
+      "assertions": [{"actual": "결과", "matcher": "toEqual", "expected": {"error": "이미 사용 한도를 채운 쿠폰입니다.", "status": 400}}],
+      "mocks": [{"target": "SupabaseClient", "reason": "쿠폰 및 사용 내역 DB 응답 재현"}]
+    },
+    {
+      "id": "UT-A3-ORDER-REAL-DOMAIN",
+      "title": "외부 포트만 fake로 두고 실제 도메인 할인 결과를 주문에 사용한다",
+      "requirement_ids": ["REQ-A3-MOCK", "REQ-A3-DISCOUNT"],
+      "system_under_test": "createCouponOrder",
+      "arrange": ["10000원 상품과 20% 쿠폰", "strict 타입의 저장소·결제사 fake", "고정 now"],
+      "act": "createCouponOrder를 호출한다.",
+      "assertions": [{"actual": "결제 요청 금액", "matcher": "toBe", "expected": 8000}, {"actual": "주문 할인 금액", "matcher": "toBe", "expected": 2000}, {"actual": "주문 상태", "matcher": "toBe", "expected": "PAID"}],
+      "mocks": [{"target": "CouponRepository", "reason": "DB 외부 I/O"}, {"target": "PaymentGateway", "reason": "결제 외부 I/O"}, {"target": "OrderRepository", "reason": "DB 외부 I/O"}]
+    }
+  ],
+  "gherkin_scenarios": [
+    {"id": "GH-A3-DISCOUNT", "title": "정률·정액 할인", "requirement_ids": ["REQ-A3-DISCOUNT"], "given": ["태그 @test_id=GH-A3-DISCOUNT와 @requirement_id=REQ-A3-DISCOUNT", "상품 금액과 쿠폰 종류·값"], "when": ["실제 할인 함수를 호출한다"], "then": [{"observable": "할인 금액", "expected": "정률 2000원, 정액 10000원"}]},
+    {"id": "GH-A3-MAXIMUM", "title": "종류별 maximum_discount", "requirement_ids": ["REQ-A3-CAP"], "given": ["태그 @test_id=GH-A3-MAXIMUM과 @requirement_id=REQ-A3-CAP", "정률/정액 쿠폰과 2000원/0원 한도"], "when": ["실제 할인 함수를 호출한다"], "then": [{"observable": "할인 금액", "expected": "2000원 또는 0원"}]},
+    {"id": "GH-A3-EMPTY", "title": "빈 코드", "requirement_ids": ["REQ-A3-INPUT"], "given": ["태그 @test_id=GH-A3-EMPTY과 @requirement_id=REQ-A3-INPUT", "로그인 사용자, 공백 코드, 10000원 주문"], "when": ["쿠폰을 검증한다"], "then": [{"observable": "결과", "expected": {"status": 400, "error": "쿠폰 코드를 입력해주세요."}}, {"observable": "DB 조회 횟수", "expected": 0}]},
+    {"id": "GH-A3-AUTH", "title": "비로그인", "requirement_ids": ["REQ-A3-INPUT"], "given": ["태그 @test_id=GH-A3-AUTH과 @requirement_id=REQ-A3-INPUT", "빈 userId, SAVE 코드, 10000원 주문"], "when": ["쿠폰을 검증한다"], "then": [{"observable": "결과", "expected": {"status": 401, "error": "로그인이 필요합니다."}}, {"observable": "DB 조회 횟수", "expected": 0}]},
+    {"id": "GH-A3-NOT-FOUND", "title": "미존재", "requirement_ids": ["REQ-A3-LOOKUP"], "given": ["태그 @test_id=GH-A3-NOT-FOUND과 @requirement_id=REQ-A3-LOOKUP", "DB에 쿠폰이 없음"], "when": ["쿠폰을 검증한다"], "then": [{"observable": "결과", "expected": {"status": 404, "error": "유효하지 않은 쿠폰 코드입니다."}}]},
+    {"id": "GH-A3-EXPIRED", "title": "만료", "requirement_ids": ["REQ-A3-LOOKUP"], "given": ["태그 @test_id=GH-A3-EXPIRED과 @requirement_id=REQ-A3-LOOKUP", "현재 2026-08-17, 종료일 2026-08-16"], "when": ["쿠폰을 검증한다"], "then": [{"observable": "결과", "expected": {"status": 400, "error": "만료된 쿠폰입니다."}}]},
+    {"id": "GH-A3-MINIMUM-EQUAL", "title": "최소값과 동일", "requirement_ids": ["REQ-A3-MINIMUM"], "given": ["태그 @test_id=GH-A3-MINIMUM-EQUAL과 @requirement_id=REQ-A3-MINIMUM", "최소값과 주문이 모두 10000원"], "when": ["쿠폰을 검증한다"], "then": [{"observable": "할인/최종 금액", "expected": {"discountAmount": 1000, "finalAmount": 9000}}]},
+    {"id": "GH-A3-MINIMUM-BELOW", "title": "최소값보다 1원 부족", "requirement_ids": ["REQ-A3-MINIMUM"], "given": ["태그 @test_id=GH-A3-MINIMUM-BELOW과 @requirement_id=REQ-A3-MINIMUM", "최소값 10000원, 주문 9999원"], "when": ["쿠폰을 검증한다"], "then": [{"observable": "결과", "expected": {"status": 400, "error": "최소 주문 금액 10,000원 이상이어야 합니다."}}]},
+    {"id": "GH-A3-USAGE", "title": "사용자 한도 도달", "requirement_ids": ["REQ-A3-USAGE"], "given": ["태그 @test_id=GH-A3-USAGE과 @requirement_id=REQ-A3-USAGE", "user_usage_limit 1, 사용 횟수 1"], "when": ["쿠폰을 검증한다"], "then": [{"observable": "결과", "expected": {"status": 400, "error": "이미 사용 한도를 채운 쿠폰입니다."}}]}
+  ],
+  "generated_files": [
+    {
+      "kind": "vitest",
+      "path": "generated/tests/a3-coupon.test.ts",
+      "content": "import { afterEach, describe, expect, it, vi } from 'vitest';\nimport type { Coupon } from '../../../task-a3-unit-tests/src/domain/coupon';\nimport { createCouponOrder, type Order } from '../../../task-a3-unit-tests/src/services/createCouponOrder';\nvi.mock('server-only', () => ({}));\nconst { calculateCouponDiscount, validateCouponCode } = await import('../../../task-a3-unit-tests/real/lib/coupons');\ntype Row = { id: string; code: string; name: string; description: null; discount_type: 'percentage' | 'fixed'; discount_value: number; minimum_amount: number; maximum_discount: number | null; usage_limit: number | null; usage_count: number | null; user_usage_limit: number | null; valid_from: string | null; valid_until: string | null; is_active: boolean; applies_to_product_id: null };\nconst row = (x: Partial<Row> = {}): Row => ({ id: 'c1', code: 'SAVE', name: 'Save', description: null, discount_type: 'fixed', discount_value: 1000, minimum_amount: 0, maximum_discount: null, usage_limit: null, usage_count: 0, user_usage_limit: 1, valid_from: null, valid_until: null, is_active: true, applies_to_product_id: null, ...x });\nfunction db(data: Row | null, count = 0) { const cq: any = {}; cq.select = vi.fn(() => cq); cq.eq = vi.fn(() => cq); cq.maybeSingle = vi.fn().mockResolvedValue({ data, error: null }); let n = 0; const uq: any = {}; uq.select = vi.fn(() => uq); uq.eq = vi.fn(() => ++n === 2 ? Promise.resolve({ count, error: null }) : uq); const from = vi.fn((t: string) => t === 'coupons' ? cq : uq); return { client: { from } as any, from }; }\nafterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });\ndescribe('A-3 iteration 2', () => {\n  it('calculates percentage and price-capped fixed discounts', () => { expect(calculateCouponDiscount({ discount_type: 'percentage', discount_value: 20, maximum_discount: null }, 10000)).toBe(2000); expect(calculateCouponDiscount({ discount_type: 'fixed', discount_value: 15000, maximum_discount: null }, 10000)).toBe(10000); });\n  it.each([['percentage', 50, 2000, 2000], ['percentage', 50, 0, 0], ['fixed', 5000, 2000, 2000], ['fixed', 5000, 0, 0]] as const)('caps %s coupons', (discount_type, discount_value, maximum_discount, expected) => { expect(calculateCouponDiscount({ discount_type, discount_value, maximum_discount }, 10000)).toBe(expected); });\n  it.each([['   ', 'user-1', 400, '쿠폰 코드를 입력해주세요.'], ['SAVE', '', 401, '로그인이 필요합니다.']] as const)('guards input before DB', async (code, userId, status, error) => { const from = vi.fn(); expect(await validateCouponCode({ supabase: { from } as any, code, subtotal: 10000, userId })).toEqual({ error, status }); expect(from).not.toHaveBeenCalled(); });\n  it('rejects missing and expired coupons', async () => { expect(await validateCouponCode({ supabase: db(null).client, code: 'SAVE', subtotal: 10000, userId: 'u1' })).toEqual({ error: '유효하지 않은 쿠폰 코드입니다.', status: 404 }); vi.useFakeTimers(); vi.setSystemTime(new Date('2026-08-17T12:00:00+09:00')); expect(await validateCouponCode({ supabase: db(row({ valid_until: '2026-08-16' })).client, code: 'SAVE', subtotal: 10000, userId: 'u1' })).toEqual({ error: '만료된 쿠폰입니다.', status: 400 }); });\n  it('asserts both sides of the minimum boundary including the exact 9999 error', async () => { expect(await validateCouponCode({ supabase: db(row({ minimum_amount: 10000 })).client, code: 'SAVE', subtotal: 10000, userId: 'u1' })).toMatchObject({ discountAmount: 1000, finalAmount: 9000 }); expect(await validateCouponCode({ supabase: db(row({ minimum_amount: 10000 })).client, code: 'SAVE', subtotal: 9999, userId: 'u1' })).toEqual({ error: '최소 주문 금액 10,000원 이상이어야 합니다.', status: 400 }); });\n  it('rejects a user at the usage limit', async () => { expect(await validateCouponCode({ supabase: db(row(), 1).client, code: 'SAVE', subtotal: 10000, userId: 'u1' })).toEqual({ error: '이미 사용 한도를 채운 쿠폰입니다.', status: 400 }); });\n  it('uses real domain logic with strictly typed external fakes', async () => { const coupon: Coupon = { code: 'P20', type: 'PERCENTAGE', value: 20, minOrderAmount: 0, expiresAt: new Date('2026-12-31T00:00:00Z'), isActive: true }; const paymentGateway = { requestPayment: vi.fn().mockResolvedValue({ approved: true, approvedAmount: 8000 }) }; const orderRepository = { save: vi.fn(async (order: Order): Promise<Order> => order) }; const order = await createCouponOrder({ orderId: 'o1', productCode: 'P1', productPrice: 10000, couponCode: 'P20', now: new Date('2026-08-17T00:00:00Z'), couponRepository: { findByCode: vi.fn().mockResolvedValue(coupon) }, paymentGateway, orderRepository }); expect(paymentGateway.requestPayment).toHaveBeenCalledWith({ orderId: 'o1', amount: 8000 }); expect(order).toMatchObject({ discountAmount: 2000, status: 'PAID' }); });\n});\n"
+    },
+    {
+      "kind": "gherkin",
+      "path": "generated/features/a3-coupon.feature",
+      "content": "# language: ko\n기능: 쿠폰 할인과 검증 규칙\n\n  @test_id=GH-A3-DISCOUNT @requirement_id=REQ-A3-DISCOUNT\n  시나리오 개요: 정률과 정액 할인\n    조건 상품 금액은 <상품금액>원이다\n    그리고 계산 쿠폰은 \"<종류>\"이고 할인값은 <할인값>이며 최대 한도는 <한도>원이다\n    만일 할인 금액을 계산하면\n    그러면 계산 할인 금액은 <할인액>원이다\n    예:\n      | 상품금액 | 종류       | 할인값 | 한도 | 할인액 |\n      | 10000    | percentage | 20     | -1   | 2000   |\n      | 10000    | fixed      | 15000  | -1   | 10000  |\n\n  @test_id=GH-A3-MAXIMUM @requirement_id=REQ-A3-CAP\n  시나리오 개요: 쿠폰 종류별 최대 할인 한도\n    조건 상품 금액은 10000원이다\n    그리고 계산 쿠폰은 \"<종류>\"이고 할인값은 <할인값>이며 최대 한도는 <한도>원이다\n    만일 할인 금액을 계산하면\n    그러면 계산 할인 금액은 <할인액>원이다\n    예:\n      | 종류       | 할인값 | 한도 | 할인액 |\n      | percentage | 50     | 2000 | 2000   |\n      | percentage | 50     | 0    | 0      |\n      | fixed      | 5000   | 2000 | 2000   |\n      | fixed      | 5000   | 0    | 0      |\n\n  @test_id=GH-A3-EMPTY @requirement_id=REQ-A3-INPUT\n  시나리오: 빈 쿠폰 코드\n    조건 현재 시각은 \"2026-08-17T12:00:00+09:00\"이다\n    그리고 로그인 사용자는 \"user-1\"이다\n    그리고 쿠폰 코드는 공백이다\n    그리고 주문 금액은 10000원이다\n    만일 쿠폰을 검증하면\n    그러면 상태는 400이다\n    그리고 실패 사유는 \"쿠폰 코드를 입력해주세요.\"이다\n    그리고 DB 조회 횟수는 0회이다\n\n  @test_id=GH-A3-AUTH @requirement_id=REQ-A3-INPUT\n  시나리오: 비로그인 고객\n    조건 현재 시각은 \"2026-08-17T12:00:00+09:00\"이다\n    그리고 로그인 사용자가 없다\n    그리고 쿠폰 코드는 \"SAVE\"이다\n    그리고 주문 금액은 10000원이다\n    만일 쿠폰을 검증하면\n    그러면 상태는 401이다\n    그리고 실패 사유는 \"로그인이 필요합니다.\"이다\n    그리고 DB 조회 횟수는 0회이다\n\n  @test_id=GH-A3-NOT-FOUND @requirement_id=REQ-A3-LOOKUP\n  시나리오: 존재하지 않는 쿠폰\n    조건 현재 시각은 \"2026-08-17T12:00:00+09:00\"이다\n    그리고 로그인 사용자는 \"user-1\"이다\n    그리고 쿠폰 코드는 \"SAVE\"이다\n    그리고 주문 금액은 10000원이다\n    그리고 DB에 쿠폰이 없다\n    만일 쿠폰을 검증하면\n    그러면 상태는 404이다\n    그리고 실패 사유는 \"유효하지 않은 쿠폰 코드입니다.\"이다\n\n  @test_id=GH-A3-EXPIRED @requirement_id=REQ-A3-LOOKUP\n  시나리오: 만료된 쿠폰\n    조건 현재 시각은 \"2026-08-17T12:00:00+09:00\"이다\n    그리고 로그인 사용자는 \"user-1\"이다\n    그리고 쿠폰 코드는 \"SAVE\"이다\n    그리고 주문 금액은 10000원이다\n    그리고 검증 쿠폰은 1000원 정액 할인이고 최소 주문금액은 0원이며 종료일은 \"2026-08-16\"이다\n    만일 쿠폰을 검증하면\n    그러면 상태는 400이다\n    그리고 실패 사유는 \"만료된 쿠폰입니다.\"이다\n\n  @test_id=GH-A3-MINIMUM-EQUAL @requirement_id=REQ-A3-MINIMUM\n  시나리오: 최소 주문금액과 같은 주문\n    조건 현재 시각은 \"2026-08-17T12:00:00+09:00\"이다\n    그리고 로그인 사용자는 \"user-1\"이다\n    그리고 쿠폰 코드는 \"SAVE\"이다\n    그리고 검증 쿠폰은 1000원 정액 할인이고 최소 주문금액은 10000원이며 종료일은 \"2026-12-31\"이다\n    그리고 주문 금액은 10000원이다\n    만일 쿠폰을 검증하면\n    그러면 할인 금액은 1000원이다\n    그리고 최종 결제 금액은 9000원이다\n\n  @test_id=GH-A3-MINIMUM-BELOW @requirement_id=REQ-A3-MINIMUM\n  시나리오: 최소 주문금액보다 1원 부족한 주문\n    조건 현재 시각은 \"2026-08-17T12:00:00+09:00\"이다\n    그리고 로그인 사용자는 \"user-1\"이다\n    그리고 쿠폰 코드는 \"SAVE\"이다\n    그리고 검증 쿠폰은 1000원 정액 할인이고 최소 주문금액은 10000원이며 종료일은 \"2026-12-31\"이다\n    그리고 주문 금액은 9999원이다\n    만일 쿠폰을 검증하면\n    그러면 상태는 400이다\n    그리고 실패 사유는 \"최소 주문 금액 10,000원 이상이어야 합니다.\"이다\n\n  @test_id=GH-A3-USAGE @requirement_id=REQ-A3-USAGE\n  시나리오: 사용자 사용 한도 도달\n    조건 현재 시각은 \"2026-08-17T12:00:00+09:00\"이다\n    그리고 로그인 사용자는 \"user-1\"이다\n    그리고 쿠폰 코드는 \"SAVE\"이다\n    그리고 주문 금액은 10000원이다\n    그리고 검증 쿠폰은 1000원 정액 할인이고 최소 주문금액은 0원이며 종료일은 \"2026-12-31\"이다\n    그리고 사용자 사용 한도는 1회이고 사용 횟수는 1회이다\n    만일 쿠폰을 검증하면\n    그러면 상태는 400이다\n    그리고 실패 사유는 \"이미 사용 한도를 채운 쿠폰입니다.\"이다\n"
+    },
+    {
+      "kind": "step-definition",
+      "path": "generated/steps/a3-coupon.steps.ts",
+      "content": "import assert from 'node:assert/strict';\nimport { Given, Then, When, World, setWorldConstructor } from '@cucumber/cucumber';\nimport { calculateCouponDiscount, validateCouponCode, type CouponDiscountType, type CouponValidationResult } from '../../../task-a3-unit-tests/real/lib/coupons';\ntype Row = { id: string; code: string; name: string; description: null; discount_type: CouponDiscountType; discount_value: number; minimum_amount: number; maximum_discount: number | null; usage_limit: number | null; usage_count: number | null; user_usage_limit: number | null; valid_from: string | null; valid_until: string | null; is_active: boolean; applies_to_product_id: null };\nclass W extends World { userId = ''; code = ''; subtotal = 0; nowIso = ''; coupon: Row | null = null; usageCount = 0; fromCalls = 0; calculation: number | undefined; result: CouponValidationResult | undefined; calcCoupon: { discount_type: CouponDiscountType; discount_value: number; maximum_discount: number | null } | undefined; client() { const cq: any = {}; cq.select = () => cq; cq.eq = () => cq; cq.maybeSingle = async () => ({ data: this.coupon, error: null }); let n = 0; const uq: any = {}; uq.select = () => uq; uq.eq = () => ++n === 2 ? Promise.resolve({ count: this.usageCount, error: null }) : uq; return { from: (t: string) => { this.fromCalls += 1; return t === 'coupons' ? cq : uq; } } as any; } }\nsetWorldConstructor(W);\nfunction clock(iso: string) { const R = globalThis.Date; const ms = R.parse(iso); class F extends R { constructor(v?: string | number) { super(v === undefined ? ms : v); } static now() { return ms; } } globalThis.Date = F as DateConstructor; return () => { globalThis.Date = R; }; }\nGiven('현재 시각은 {string}이다', function(this: W, v: string) { this.nowIso = v; }); Given('로그인 사용자는 {string}이다', function(this: W, v: string) { this.userId = v; }); Given('로그인 사용자가 없다', function(this: W) { this.userId = ''; }); Given('쿠폰 코드는 {string}이다', function(this: W, v: string) { this.code = v; }); Given('쿠폰 코드는 공백이다', function(this: W) { this.code = '   '; }); Given('상품 금액은 {int}원이다', function(this: W, v: number) { this.subtotal = v; }); Given('주문 금액은 {int}원이다', function(this: W, v: number) { this.subtotal = v; });\nGiven('계산 쿠폰은 {string}이고 할인값은 {int}이며 최대 한도는 {int}원이다', function(this: W, t: CouponDiscountType, v: number, cap: number) { this.calcCoupon = { discount_type: t, discount_value: v, maximum_discount: cap < 0 ? null : cap }; }); Given('DB에 쿠폰이 없다', function(this: W) { this.coupon = null; }); Given('검증 쿠폰은 {int}원 정액 할인이고 최소 주문금액은 {int}원이며 종료일은 {string}이다', function(this: W, value: number, minimum: number, until: string) { this.coupon = { id: 'c1', code: this.code, name: 'Save', description: null, discount_type: 'fixed', discount_value: value, minimum_amount: minimum, maximum_discount: null, usage_limit: null, usage_count: 0, user_usage_limit: 1, valid_from: null, valid_until: until, is_active: true, applies_to_product_id: null }; }); Given('사용자 사용 한도는 {int}회이고 사용 횟수는 {int}회이다', function(this: W, limit: number, count: number) { assert.ok(this.coupon); this.coupon.user_usage_limit = limit; this.usageCount = count; });\nWhen('할인 금액을 계산하면', function(this: W) { assert.ok(this.calcCoupon); this.calculation = calculateCouponDiscount(this.calcCoupon, this.subtotal); }); When('쿠폰을 검증하면', async function(this: W) { assert.ok(this.nowIso); const restore = clock(this.nowIso); try { this.result = await validateCouponCode({ supabase: this.client(), code: this.code, subtotal: this.subtotal, userId: this.userId }); } finally { restore(); } });\nThen('계산 할인 금액은 {int}원이다', function(this: W, v: number) { assert.equal(this.calculation, v); }); Then('할인 금액은 {int}원이다', function(this: W, v: number) { assert.ok(this.result && 'discountAmount' in this.result); assert.equal(this.result.discountAmount, v); }); Then('최종 결제 금액은 {int}원이다', function(this: W, v: number) { assert.ok(this.result && 'finalAmount' in this.result); assert.equal(this.result.finalAmount, v); }); Then('상태는 {int}이다', function(this: W, v: number) { assert.ok(this.result && 'status' in this.result); assert.equal(this.result.status, v); }); Then('실패 사유는 {string}이다', function(this: W, v: string) { assert.ok(this.result && 'error' in this.result); assert.equal(this.result.error, v); }); Then('DB 조회 횟수는 {int}회이다', function(this: W, v: number) { assert.equal(this.fromCalls, v); });\n"
+    },
+    {
+      "kind": "step-definition",
+      "path": "generated/support/server-only-loader.mjs",
+      "content": "// Required preload for the server-only production marker.\nimport { register } from 'node:module';\nregister('data:text/javascript,' + encodeURIComponent(`export async function resolve(specifier, context, nextResolve) { if (specifier === 'server-only') return { url: 'data:text/javascript,export%20{}', shortCircuit: true }; return nextResolve(specifier, context); }`), import.meta.url);\n"
+    },
+    {
+      "kind": "step-definition",
+      "path": "generated/cucumber.mjs",
+      "content": "// Execute from task-a5-requirement-test-harness:\n// node --import ./generated/support/server-only-loader.mjs --import tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js --config ./generated/cucumber.mjs\nexport default { paths: ['generated/features/a3-coupon.feature'], import: ['generated/steps/a3-coupon.steps.ts'], format: ['progress'] };\n"
+    }
+  ]
+}

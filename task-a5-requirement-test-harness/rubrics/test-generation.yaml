@@ -1,0 +1,29 @@
+version: test-generation-0.1
+extends: _base.yaml
+min_total: 4.0
+min_axis: 3
+axes:
+  - name: coverage
+    weight: 0.35
+    scale:
+      1: 정상 경로 위주이며 핵심 실패 조건과 경계값 쌍이 빠져 있다.
+      3: 주요 정상·실패 경로는 있으나 요구사항 하나 이상에 경계값 또는 회귀 테스트가 없다.
+      5: 모든 요구사항 ID가 정상·실패·경계·회귀 테스트 중 필요한 항목과 연결된다.
+  - name: unambiguity
+    weight: 0.25
+    scale:
+      1: should work, 정상 동작처럼 관찰할 수 없는 단언이 있다.
+      3: 대부분 구체적이지만 상태·금액·오류·호출 여부 중 일부 예상값이 빠져 있다.
+      5: 모든 테스트가 입력과 관찰 대상, 비교 연산자, 기대값을 명시한다.
+  - name: independence
+    weight: 0.20
+    scale:
+      1: 실행 순서나 이전 시나리오의 변경 가능한 상태에 의존한다.
+      3: 대체로 독립적이나 공유 fixture 또는 시간·네트워크 의존이 일부 남아 있다.
+      5: 각 테스트가 상태를 새로 만들고 시간·네트워크를 통제하며 순서 변경에도 동일하다.
+  - name: executability
+    weight: 0.20
+    scale:
+      1: 존재하지 않는 API를 사용하거나 구현 불가능한 Step이 있다.
+      3: 대부분 구현 가능하지만 일부 import, 타입, Step Definition 계획이 불완전하다.
+      5: Vitest 코드와 모든 Gherkin Step을 현재 프로젝트에서 바로 구현·실행할 수 있다.

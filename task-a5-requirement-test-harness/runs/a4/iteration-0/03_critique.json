@@ -1,0 +1,25 @@
+{
+  "requirement_hash": "a4c0ffee1234",
+  "iteration": 0,
+  "critic_session_id": "critique-a5-senior-qa-session",
+  "weaknesses": [
+    {
+      "location": "generated/steps/a4-coupon-order.steps.ts — production import",
+      "problem": "일반 Cucumber.js 프로세스에서 서버 전용 모듈을 직접 import하면서도 server-only 처리 방법을 제공하지 않아 Step Definition이 로드 단계에서 실패할 수 있다.",
+      "evidence": "Step Definition은 '../../../task-a3-unit-tests/real/lib/coupons'를 직접 import한다. 해당 프로덕션 소스의 첫 런타임 import는 import \"server-only\"이며, 생성된 A4 파일에는 Next 서버 조건, Cucumber loader 설정, server-only alias/stub이 전혀 없다. 따라서 시나리오 실행 전에 모듈 해석 또는 server-only 가드에서 중단될 수 있다.",
+      "revision_direction": "Cucumber 실행 설정에 테스트 전용 server-only alias/stub을 명시하거나, 서버 조건을 지원하는 테스트 진입점을 통해 coupons.ts를 로드하도록 Step Definition import를 바꾼 뒤 Cucumber dry-run이 아니라 실제 시나리오 로드를 검증한다."
+    },
+    {
+      "location": "generated/steps/a4-coupon-order.steps.ts — Then('주문이 승인된다')",
+      "problem": "'주문 승인'이라는 Then이 주문이나 결제 승인을 관찰하지 않고 쿠폰 검증 결과에 error가 없다는 사실만 확인한다.",
+      "evidence": "When은 validateCouponCode만 호출하며 프로덕션 CouponValidationSuccess에는 coupon, discountAmount, finalAmount만 있고 주문 상태나 결제 승인 필드는 없다. 그런데 Then은 !('error' in this.result)만 assert하고 이를 '주문이 승인된다'로 표현하므로, 주문 생성·결제·저장이 전혀 실행되지 않아도 통과한다.",
+      "revision_direction": "현재 API 범위에서는 Then 문구를 '쿠폰 적용이 성공한다'로 바꾸고 coupon, discountAmount, finalAmount를 명시적으로 검증한다. 실제 주문 승인이 요구된다면 주문/결제 경계를 호출하는 SUT로 When을 교체하고 승인 상태와 저장된 주문을 assert한다."
+    },
+    {
+      "location": "generated/features/a4-coupon-order.feature — '서버 장바구니 합계를 신뢰한다' 및 대응 Given/When",
+      "problem": "시나리오가 items의 값 우선순위만 확인할 뿐 가격과 수량이 서버 조회에서 왔다는 출처를 검증하지 못한다.",
+      "evidence": "Given('장바구니에는 ...')은 Feature의 숫자로 this.items를 직접 만들고 When에서 그대로 validateCouponCode에 전달한다. 프로덕션 CouponCartItem 주석은 price가 반드시 서버에서 조회한 단가여야 한다고 하지만, 생성 테스트에는 장바구니 저장소 조회도 없고 클라이언트가 items를 변조했을 때 이를 배제하는 경계도 없다. 따라서 REQ-A4-SOURCE의 '서버가 조회하는 장바구니 items' 조건은 관찰되지 않는다.",
+      "revision_direction": "클라이언트 입력은 subtotal과 상품 식별자만 주고, 테스트용 장바구니/상품 저장소가 서버 단가와 수량을 반환하는 주문 경계를 When에서 호출한다. 해당 저장소 호출 인자와 반환 items 합계 12000원, 할인 2400원, 최종 9600원을 함께 assert한다."
+    }
+  ]
+}

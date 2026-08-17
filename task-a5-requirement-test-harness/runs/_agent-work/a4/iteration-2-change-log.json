@@ -1,0 +1,11 @@
+{
+  "requirement_hash": "a4c0ffee1234",
+  "iteration": 2,
+  "changes": [
+    {"location": "GH-A4-MINIMUM-EQUAL and generated Feature", "before": "최소금액 Outline의 성공 행이 할인액만 관찰해 최종 결제 금액을 고정하지 않았다.", "after": "10000원 성공을 독립 시나리오로 분리해 할인액 1000원과 최종 결제 금액 9000원을 모두 검증한다.", "rationale": ["iteration-1 priority fix", "REQ-A4-BOUNDARY 성공 결과의 관찰 가능성 강화"]},
+    {"location": "GH-A4-MINIMUM-BELOW and generated Feature", "before": "9999원 Outline 행이 상태 400만 관찰하고 정확한 실패 사유를 확인하지 않았다.", "after": "9999원 실패를 독립 시나리오로 분리해 상태 400과 '최소 주문 금액 10,000원 이상이어야 합니다.'를 모두 검증한다.", "rationale": ["iteration-1 priority fix", "경계값 - 1의 구체적 거절 계약 고정"]},
+    {"location": "generated/features/a4-coupon-order.feature", "before": "Feature와 metadata ID/requirement ID를 기계적으로 연결하는 태그가 없었다.", "after": "모든 시나리오와 시나리오 개요에 @test_id 및 @requirement_id 태그를 추가했다.", "rationale": ["Feature-메타데이터 추적성 강화"]},
+    {"location": "generated/cucumber.mjs and server-only-loader.mjs", "before": "loader 참고만 있고 Feature·Step Definition 경로를 묶은 실행 config가 없었다.", "after": "A-4 Feature/Step 경로를 고정한 config와 server-only preload를 포함한 전체 실행 명령을 추가했다.", "rationale": ["실행 추적성과 재현성 확보"]},
+    {"location": "generated/steps/a4-coupon-order.steps.ts", "before": "최소금액 경계가 결과 유형/값 공용 Step으로 표현됐다.", "after": "성공의 coupon/할인액/최종액과 실패의 상태/정확한 사유를 전용 Then으로 직접 검증한다.", "rationale": ["metadata와 실행 파일의 관찰값 일치"]}
+  ]
+}

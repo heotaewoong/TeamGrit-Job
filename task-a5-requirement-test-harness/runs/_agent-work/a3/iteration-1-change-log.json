@@ -1,0 +1,12 @@
+{
+  "requirement_hash": "a3c0ffee1234",
+  "iteration": 1,
+  "changes": [
+    {"location": "UT-A3-MAXIMUM-MATRIX and generated/tests/a3-coupon.test.ts", "before": "maximum_discount 2000과 0을 정률 쿠폰에서만 검증했다.", "after": "정률과 정액 각각에 2000원 및 0원 한도를 적용하는 네 조합을 검증한다.", "rationale": ["REQ-A3-CAP은 쿠폰 종류를 제한하지 않는다.", "프로덕션 fixed 분기가 maximum_discount를 무시하는 결함을 드러낸다."]},
+    {"location": "generated/features/a3-coupon.feature", "before": "빈 코드, 비로그인, 미존재, 만료 실패 흐름이 메타데이터에만 있고 Feature에 없었다.", "after": "네 실패 흐름을 Feature에 추가하고 상태·정확한 오류·입력 가드의 DB 0회를 고정했다.", "rationale": ["Critique의 Feature 누락 지적", "REQ-A3-INPUT과 REQ-A3-LOOKUP의 실행 가능한 추적성 확보"]},
+    {"location": "generated/steps/a3-coupon.steps.ts", "before": "A-3 Feature에 Step Definition이 없었다.", "after": "실제 할인 함수와 실제 validateCouponCode를 호출하는 strict TypeScript Step Definition, 시나리오별 중립 World, Supabase fake, 고정 시계를 추가했다.", "rationale": ["undefined step 제거", "도메인 함수는 Mock하지 않고 외부 DB만 fake로 둔다."]},
+    {"location": "A-3 Feature Given", "before": "최소금액과 사용 한도 시나리오가 로그인·코드·쿠폰 종류·할인값의 숨은 World 기본값에 의존했다.", "after": "각 검증 시나리오에 현재 시각, 로그인 상태, 코드, 주문 금액, 쿠폰 종류·값·최소금액·종료일을 명시했다.", "rationale": ["Assessment의 숨은 기본 상태 지적", "시나리오 순서 독립성 강화"]},
+    {"location": "generated/tests/a3-coupon.test.ts createCouponOrder fake", "before": "orderRepository.save의 order 매개변수 타입이 암시적 any였다.", "after": "Order 타입과 Promise<Order> 반환 타입을 명시했다.", "rationale": ["strict/noImplicitAny 컴파일 가능성 확보"]},
+    {"location": "generated/support/server-only-loader.mjs", "before": "server-only 런타임 import를 처리하는 Cucumber 진입 조건이 없었다.", "after": "테스트 전용 ESM resolver와 명시적 실행 명령을 제공했다.", "rationale": ["프로덕션 소스를 수정하지 않고 Cucumber에서 서버 전용 표식만 격리"]}
+  ]
+}

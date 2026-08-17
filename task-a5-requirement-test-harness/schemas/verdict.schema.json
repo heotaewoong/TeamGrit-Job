@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Independent Test Quality Verdict",
+  "type": "object",
+  "required": ["requirement_hash", "iteration", "evaluator_session_id", "scores", "evidence", "weighted_total", "rubric_verdict", "verdict", "contract_errors"],
+  "properties": {
+    "requirement_hash": {"type": "string"},
+    "iteration": {"type": "integer", "minimum": 0},
+    "evaluator_session_id": {"type": "string", "minLength": 1},
+    "scores": {
+      "type": "object",
+      "required": ["coverage", "unambiguity", "independence", "executability"],
+      "properties": {
+        "coverage": {"type": "integer", "minimum": 1, "maximum": 5},
+        "unambiguity": {"type": "integer", "minimum": 1, "maximum": 5},
+        "independence": {"type": "integer", "minimum": 1, "maximum": 5},
+        "executability": {"type": "integer", "minimum": 1, "maximum": 5}
+      },
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["coverage", "unambiguity", "independence", "executability"],
+      "additionalProperties": {"type": "string", "minLength": 1}
+    },
+    "weighted_total": {"type": "number", "minimum": 1, "maximum": 5},
+    "rubric_verdict": {"enum": ["PASS", "REJECT"]},
+    "verdict": {"enum": ["PASS", "REJECT"]},
+    "priority_fixes": {"type": "array", "items": {"type": "string"}},
+    "contract_errors": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

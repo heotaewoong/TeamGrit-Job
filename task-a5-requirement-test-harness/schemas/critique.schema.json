@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Senior QA Critique",
+  "type": "object",
+  "required": ["requirement_hash", "iteration", "critic_session_id", "weaknesses"],
+  "properties": {
+    "requirement_hash": {"type": "string"},
+    "iteration": {"type": "integer", "minimum": 0},
+    "critic_session_id": {"type": "string", "minLength": 1},
+    "weaknesses": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["location", "problem", "evidence", "revision_direction"],
+        "properties": {
+          "location": {"type": "string", "minLength": 1},
+          "problem": {"type": "string", "minLength": 1},
+          "evidence": {"type": "string", "minLength": 1},
+          "revision_direction": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

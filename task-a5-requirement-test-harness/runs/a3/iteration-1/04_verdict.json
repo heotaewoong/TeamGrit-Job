@@ -1,0 +1,35 @@
+{
+  "requirement_hash": "a3c0ffee1234",
+  "iteration": 1,
+  "rubric_version": "test-generation-0.1",
+  "weights": {
+    "coverage": 0.35,
+    "unambiguity": 0.25,
+    "independence": 0.2,
+    "executability": 0.2
+  },
+  "scores": {
+    "coverage": 5,
+    "unambiguity": 4,
+    "independence": 5,
+    "executability": 5
+  },
+  "evidence": {
+    "coverage": "UT-A3-DISCOUNT-MATRIX와 GH-A3-DISCOUNT가 정률 정상값과 상품가를 넘는 정액 할인 회귀를 함께 고정하고, UT-A3-MAXIMUM-MATRIX와 GH-A3-MAXIMUM은 정률·정액 각각에 대해 2000원 및 0원 maximum_discount 조합을 모두 연결한다. UT-A3-INPUT-GUARDS/GH-A3-EMPTY/GH-A3-AUTH, UT-A3-LOOKUP-FAILURES/GH-A3-NOT-FOUND/GH-A3-EXPIRED, UT-A3-MINIMUM-BOUNDARY/GH-A3-MINIMUM, UT-A3-USAGE-LIMIT/GH-A3-USAGE가 입력·조회·경계·사용 한도 실패를 빠짐없이 추적한다. UT-A3-ORDER-REAL-DOMAIN과 UT-A3-INVALID-NO-PAYMENT는 실제 도메인 계산을 통과시킨 정상 주문뿐 아니라 최소금액 실패 시 결제·저장 포트가 호출되지 않는 회귀까지 REQ-A3-MOCK에 연결한다.",
+    "unambiguity": "UT-A3-INPUT-GUARDS와 UT-A3-LOOKUP-FAILURES는 정확한 status/error 및 DB 미호출을, UT-A3-ORDER-REAL-DOMAIN과 UT-A3-INVALID-NO-PAYMENT는 정확한 결제 요청·저장 결과·부수효과 미호출을 명시한다. GH-A3-DISCOUNT와 GH-A3-MAXIMUM의 실제 Scenario Outline은 각 쿠폰 종류·할인값·한도·예상 할인액을 행별 수치로 고정하며, GH-A3-EMPTY/GH-A3-AUTH/GH-A3-NOT-FOUND/GH-A3-EXPIRED/GH-A3-USAGE는 구체적인 상태와 실패 사유를 함께 단언한다. 그러나 GH-A3-MINIMUM의 9999원 예시 행은 실제 Feature에서 상태 400만 확인하고, 시나리오 메타데이터에 명시된 '최소 주문 금액 10,000원 이상이어야 합니다.' 오류 사유를 단언하지 않아 모든 테스트의 관찰값이 완결적이라는 5점 기준에는 미달한다.",
+    "independence": "UT-A3-INPUT-GUARDS와 UT-A3-MINIMUM-BOUNDARY는 케이스마다 새 vi.fn 또는 fakeDb(record(...))를 만들고, UT-A3-LOOKUP-FAILURES의 fake timer는 afterEach에서 복원된다. GH-A3-EMPTY부터 GH-A3-USAGE까지 CouponWorld 인스턴스 필드가 시나리오마다 초기화되고 client()가 호출마다 새 쿠폰·사용내역 query fake를 생성한다. GH-A3-EXPIRED와 GH-A3-MINIMUM의 검증 Step은 각 시나리오가 명시한 ISO 시각으로 전역 Date를 교체한 뒤 finally에서 즉시 복원하므로 시간·네트워크·실행 순서 의존이 남지 않는다.",
+    "executability": "UT-A3-DISCOUNT-MATRIX부터 UT-A3-INVALID-NO-PAYMENT까지 생성된 Vitest 코드는 프로덕션의 calculateCouponDiscount, validateCouponCode, createCouponOrder 시그니처와 일치하며 Order 타입을 사용해 외부 포트 fake의 콜백도 명시적으로 타입화한다. GH-A3-DISCOUNT, GH-A3-MAXIMUM, GH-A3-EMPTY, GH-A3-AUTH, GH-A3-NOT-FOUND, GH-A3-EXPIRED, GH-A3-MINIMUM, GH-A3-USAGE의 실제 Feature 문장마다 일치하는 Given/When/Then Step Definition이 존재한다. 생성된 server-only-loader.mjs는 Cucumber에서 프로덕션 모듈의 server-only import를 처리하는 구체적인 실행 명령과 로더를 제공하며, Step은 체인 가능한 Supabase fake와 복원 가능한 고정 시계를 구현한다. 정액 maximum_discount 행이 현재 소스의 결함을 드러내 실패할 수 있는 것은 테스트 실행 불가능성이 아니라 요구사항 회귀 검출이다."
+  },
+  "weighted_total": 4.75,
+  "rubric_verdict": "PASS",
+  "verdict": "PASS",
+  "priority_fixes": [
+    "GH-A3-MINIMUM의 9999원 행을 성공/실패별 시나리오로 분리하거나 오류 사유 열을 추가해 status 400과 정확한 오류 문구를 함께 단언한다.",
+    "Scenario Outline 예시와 메타데이터 test/scenario ID의 대응을 실행 리포트에서도 바로 추적할 수 있도록 Feature 태그(예: @GH-A3-MINIMUM, @REQ-A3-MINIMUM)를 추가한다.",
+    "제시된 Vitest 및 Cucumber 명령을 자동화된 검증 단계에 연결해 정액 maximum_discount 2000원·0원 행이 현재 프로덕션 결함을 일관되게 검출하는지 확인한다."
+  ],
+  "contract_errors": [],
+  "evaluator_model": "gpt-5.6-sol",
+  "evaluator_session_id": "eval-a5-final-session",
+  "evaluated_at": "2026-08-17T03:38:56.110596+00:00"
+}

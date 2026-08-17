@@ -1,0 +1,11 @@
+version: 0.1
+max_iterations: 2
+initial_iteration: 0
+rubric: rubrics/test-generation.yaml
+scenario_schema: schemas/scenarios.schema.json
+verdict_schema: schemas/verdict.schema.json
+convergence:
+  min_total: 4.0
+  min_axis: 3
+  require_contract_pass: true
+  require_no_priority_fixes: true

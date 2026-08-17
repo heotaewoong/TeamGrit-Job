@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Requirement To Test Harness Input",
+  "type": "object",
+  "required": ["requirement_hash", "task", "target_stack", "requirements", "source_files", "constraints", "created_at"],
+  "properties": {
+    "requirement_hash": {"type": "string", "pattern": "^[a-f0-9]{12,64}$"},
+    "task": {"type": "string", "minLength": 1},
+    "target_stack": {
+      "type": "object",
+      "required": ["language", "unit_test", "bdd"],
+      "properties": {
+        "language": {"type": "string", "minLength": 1},
+        "unit_test": {"type": "string", "minLength": 1},
+        "bdd": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "text"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^REQ-[A-Z0-9-]+$"},
+          "text": {"type": "string", "minLength": 1},
+          "risk": {"enum": ["low", "medium", "high"]}
+        },
+        "additionalProperties": false
+      }
+    },
+    "source_files": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "constraints": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "created_at": {"type": "string", "format": "date-time"}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,15 @@
+{
+  "requirement_hash": "a3c0ffee1234",
+  "task": "A-3 쿠폰 적용 주문 로직 단위 테스트 생성",
+  "iteration": 1,
+  "max_iterations": 2,
+  "generator_session_id": "gen-a5-refine-session",
+  "critic_session_id": "critique-a5-final-session",
+  "evaluator_session_id": "eval-a5-final-session",
+  "weighted_total": 4.75,
+  "rubric_verdict": "PASS",
+  "contract_verdict": "PASS",
+  "contract_errors": [],
+  "converged": false,
+  "recorded_at": "2026-08-17T03:38:56.127648+00:00"
+}

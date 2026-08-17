@@ -1,0 +1,25 @@
+{
+  "requirement_hash": "a4c0ffee1234",
+  "iteration": 1,
+  "critic_session_id": "critique-a5-final-session",
+  "weaknesses": [
+    {
+      "location": "generated/features/a4-coupon-order.feature — '현재 API 경계에서 서버 신뢰 items 우선' 및 대응 Given",
+      "problem": "장바구니 items가 서버에서 신뢰할 수 있게 조회됐다는 핵심 전제를 시나리오 문구로 선언할 뿐 테스트 경로에서 관찰하지 않는다.",
+      "evidence": "Given은 Feature에 적힌 6000원과 2개를 그대로 this.items에 넣고 trustedItemsTotal도 같은 입력을 곱해 만든다. When은 이 배열을 validateCouponCode에 직접 전달한다. 프로덕션 API는 items의 출처를 받거나 검증하지 않으므로 테스트는 items가 subtotal보다 우선한다는 계산만 증명하며, REQ-A4-SOURCE의 서버 신뢰 출처는 클라이언트가 같은 배열을 주입해도 동일하게 통과한다.",
+      "revision_direction": "상품 식별자만 입력받아 서버 측 장바구니/상품 저장소에서 단가와 수량을 조회한 뒤 validateCouponCode를 호출하는 경계를 SUT로 제공하고, 저장소 호출과 반환 items 합계 12000원을 검증한다. 현재 소스 범위에 그 경계가 없다면 시나리오를 '전달된 items 합계 우선'으로 한정하고 서버 출처 검증은 미구현으로 명시한다."
+    },
+    {
+      "location": "generated/features/a4-coupon-order.feature — '최소 주문금액 경계'의 9999원 행과 generated/steps/a4-coupon-order.steps.ts의 결과 유형/값 Then",
+      "problem": "1원 부족 케이스가 상태 400만 확인해 최소 주문금액이 아닌 다른 실패 원인도 정답으로 받아들인다.",
+      "evidence": "REQ-A4-BOUNDARY의 9999원 거절에 대해 unit_tests와 gherkin_scenarios 메타데이터는 정확한 오류 '최소 주문 금액 10,000원 이상이어야 합니다.'를 기대한다. 그러나 생성 Feature의 예시 행은 유형 '상태', 결과값 400만 갖고, Step Definition은 유형이 '할인금액'이 아니면 어떤 문자열이든 status 분기로 처리한다. 따라서 미존재·만료·할인 불가 같은 임의의 400도 이 경계 시나리오를 통과한다.",
+      "revision_direction": "10000원 성공과 9999원 실패를 별도 시나리오로 나누고, 실패 시나리오에서 상태 400과 정확한 최소 주문금액 오류 문구를 모두 검증한다. 결과 유형 분기를 유지한다면 허용값을 할인금액/상태로 제한하고 그 외 값은 즉시 실패시킨다."
+    },
+    {
+      "location": "generated/steps/a4-coupon-order.steps.ts — seenWorlds, Before hook, fixedClock",
+      "problem": "시나리오 격리를 검증하려는 Step Definition 자체가 모듈 전역 WeakSet과 globalThis.Date라는 공유 상태를 사용해 병렬 Cucumber 실행에서 상호 간섭할 수 있다.",
+      "evidence": "REQ-A4-INDEPENDENT는 시나리오 간 상태 비공유를 요구하지만 seenWorlds는 모든 시나리오가 공유하는 모듈 전역 객체다. 또한 When마다 fixedClock이 globalThis.Date를 교체한 채 비동기 validateCouponCode를 await하므로 병렬 시나리오가 서로 다른 Date 생성자와 복원 순서를 덮어쓸 수 있다. 생성된 실행 안내에는 병렬 실행 금지나 프로세스 격리가 고정돼 있지 않다.",
+      "revision_direction": "seenWorlds를 제거하고 Before에서 현재 World의 초기 필드와 호출 횟수만 검증하며 fake는 World 인스턴스 필드로만 보관한다. validateCouponCode에 시계 주입점이 없으므로 Cucumber 실행을 명시적으로 단일 병렬도(--parallel 1)로 고정하거나 시나리오별 프로세스로 격리하고, 전역 Date 복원은 실패 여부와 무관하게 보장한다."
+    }
+  ]
+}

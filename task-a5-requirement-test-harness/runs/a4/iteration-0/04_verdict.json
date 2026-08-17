@@ -1,0 +1,35 @@
+{
+  "requirement_hash": "a4c0ffee1234",
+  "iteration": 0,
+  "rubric_version": "test-generation-0.1",
+  "weights": {
+    "coverage": 0.35,
+    "unambiguity": 0.25,
+    "independence": 0.2,
+    "executability": 0.2
+  },
+  "scores": {
+    "coverage": 4,
+    "unambiguity": 4,
+    "independence": 4,
+    "executability": 5
+  },
+  "evidence": {
+    "coverage": "UT-A4-HAPPY-PERCENTAGE/UT-A4-HAPPY-FIXED, UT-A4-NO-CODE/UT-A4-NO-AUTH, UT-A4-INVALID/UT-A4-EXPIRED/UT-A4-USAGE가 정상과 주요 실패 분기를 모두 덮는다. UT-A4-BOUNDARY와 UT-A4-MAXIMUM은 정확한 최소값·1원 미만·최대 할인 한도를, UT-A4-SERVER-SOURCE와 GH-A4-SOURCE는 999999원 클라이언트 subtotal 대신 12000원 items 합계를 쓰는 회귀를 고정한다. 다만 UT-A4-INDEPENDENT-WORLD는 메타데이터에만 있고 Vitest 파일에 출고되지 않았으며, GH-A4-SOURCE의 메타데이터에 있던 이전 시나리오 DB 호출 기록 0 단언도 실제 Feature에서 누락되어 REQ-A4-INDEPENDENT의 직접 회귀 검증이 없다.",
+    "unambiguity": "GH-A4-PERCENTAGE, GH-A4-NO-CODE, GH-A4-NO-AUTH, GH-A4-NOT-FOUND, GH-A4-EXPIRED, GH-A4-USAGE는 금액 또는 정확한 상태·실패 사유를 고정한다. GH-A4-MIN-EQUAL/GH-A4-MIN-BELOW/GH-A4-MAXIMUM과 GH-A4-SOURCE도 경계 입력 및 수치 결과가 명확하다. 그러나 UT-A4-INDEPENDENT-WORLD의 계획된 동일성/호출 기록 단언과 GH-A4-SOURCE의 이전 호출 기록 단언이 실제 생성 코드에는 없어 메타데이터와 실행 산출물의 관찰 대상이 일치하지 않는다.",
+    "independence": "GH-A4-PERCENTAGE부터 GH-A4-SOURCE까지 CouponWorld의 인스턴스 필드와 initialCoupon()으로 상태가 생성되고 newClient()가 호출마다 새 query fake를 만든다. UT-A4-BOUNDARY 대응 Vitest는 equal과 below에 별도 fakeDb를 만들고 객체 비동일성도 확인하며 afterEach가 timer와 mock을 복원한다. GH-A4-EXPIRED 대응 Feature는 2000-01-01이라는 과거 날짜에 기대고 명시적으로 시계를 고정하지 않으며, REQ-A4-INDEPENDENT를 직접 검증한다던 UT-A4-INDEPENDENT-WORLD가 실제 파일에서 누락되어 5점 근거가 완결되지 않는다.",
+    "executability": "UT-A4-HAPPY-PERCENTAGE부터 UT-A4-SERVER-SOURCE까지 대응하는 Vitest 코드는 실제 validateCouponCode 시그니처와 체인 가능한 Supabase fake를 사용한다. GH-A4-PERCENTAGE부터 GH-A4-SOURCE까지 실제 Feature의 모든 문장은 생성된 Step Definition의 Given/When/Then 표현식과 일치한다. CouponWorld 생성자 등록, 결과 타입, 한국어 Cucumber 키워드, 상태·금액·오류·DB 호출 단언이 모두 구현되어 생성 산출물 자체에는 미정의 Step이나 존재하지 않는 프로덕션 API가 없다."
+  },
+  "weighted_total": 4.2,
+  "rubric_verdict": "PASS",
+  "verdict": "PASS",
+  "priority_fixes": [
+    "UT-A4-INDEPENDENT-WORLD를 실제 Vitest 파일에 출고하거나 Cucumber Hook/보조 시나리오로 각 시나리오가 새 World와 새 fake를 받는 사실을 직접 검증한다.",
+    "GH-A4-SOURCE 메타데이터와 실제 Feature를 일치시키고, 이전 시나리오의 호출 기록이 유입되지 않았음을 관찰 가능한 값으로 단언한다.",
+    "GH-A4-EXPIRED의 현재 시각을 고정해 실제 시스템 시계 의존을 제거하고 Vitest와 Cucumber 전체 실행으로 독립성을 확인한다."
+  ],
+  "contract_errors": [],
+  "evaluator_model": "gpt-5.6-sol",
+  "evaluator_session_id": "eval-a5-independent-session",
+  "evaluated_at": "2026-08-17T03:29:44.502243+00:00"
+}

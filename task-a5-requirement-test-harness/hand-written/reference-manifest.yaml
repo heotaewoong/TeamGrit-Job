@@ -1,0 +1,14 @@
+version: 0.1
+blind_comparison: true
+rule: Gen, Critique, Eval이 완료되고 Validate가 통과하기 전에는 아래 파일을 공개하지 않는다.
+a3:
+  summary: task-a3-unit-tests/README.md
+  tests:
+    - task-a3-unit-tests/src/domain/coupon.test.ts
+    - task-a3-unit-tests/src/services/createCouponOrder.test.ts
+    - task-a3-unit-tests/real/lib/coupons.discount.test.ts
+    - task-a3-unit-tests/real/lib/coupons.validate.test.ts
+a4:
+  summary: task-a4-bdd-tests/README.md
+  feature: task-a4-bdd-tests/real/features/coupon-order.feature
+  steps: task-a4-bdd-tests/real/features/step_definitions/coupon-order.steps.ts
