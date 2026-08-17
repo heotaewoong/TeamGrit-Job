@@ -1,0 +1,26 @@
+{
+  "requirement_hash": "a4c0ffee1234",
+  "task": "A-4 쿠폰 적용 주문 흐름 BDD 인수 테스트 생성",
+  "target_stack": {
+    "language": "TypeScript",
+    "unit_test": "Vitest",
+    "bdd": "Cucumber.js"
+  },
+  "requirements": [
+    {"id": "REQ-A4-HAPPY", "text": "로그인 고객은 유효한 정률 또는 정액 쿠폰을 적용해 할인 금액과 최종 결제 금액을 확인할 수 있다.", "risk": "medium"},
+    {"id": "REQ-A4-AUTH", "text": "쿠폰 코드를 입력하지 않았거나 로그인하지 않은 고객의 주문은 구체적인 실패 사유와 함께 거절된다.", "risk": "medium"},
+    {"id": "REQ-A4-VALIDITY", "text": "존재하지 않거나 만료됐거나 사용자 사용 한도에 도달한 쿠폰은 거절된다.", "risk": "high"},
+    {"id": "REQ-A4-BOUNDARY", "text": "최소 주문금액과 정확히 같으면 허용하고 1원 부족하면 거절하며 최대 할인 한도를 넘기지 않는다.", "risk": "high"},
+    {"id": "REQ-A4-SOURCE", "text": "할인 기준 금액은 클라이언트 subtotal보다 서버가 신뢰하는 장바구니 items 합계를 우선한다.", "risk": "high"},
+    {"id": "REQ-A4-INDEPENDENT", "text": "각 Cucumber 시나리오는 새로운 World와 가짜 저장소를 사용해 서로 상태를 공유하지 않는다.", "risk": "medium"}
+  ],
+  "source_files": [
+    "task-a3-unit-tests/real/lib/coupons.ts"
+  ],
+  "constraints": [
+    "고객이 읽을 수 있는 Given/When/Then으로 표현한다.",
+    "Then은 성공 여부만 쓰지 말고 가능한 경우 금액이나 실패 사유도 함께 고정한다.",
+    "기존 task-a4-bdd-tests의 Feature와 Step Definition은 Gen과 Eval에 제공하지 않는다."
+  ],
+  "created_at": "2026-08-17T00:00:00+09:00"
+}

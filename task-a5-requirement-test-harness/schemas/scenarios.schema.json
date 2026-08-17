@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Generated Unit Tests And Gherkin Scenarios",
+  "type": "object",
+  "required": ["requirement_hash", "iteration", "generator_session_id", "unit_tests", "gherkin_scenarios", "generated_files"],
+  "properties": {
+    "requirement_hash": {"type": "string", "pattern": "^[a-f0-9]{12,64}$"},
+    "iteration": {"type": "integer", "minimum": 0},
+    "generator_session_id": {"type": "string", "minLength": 1},
+    "generator_model": {"type": "string", "minLength": 1},
+    "packaged_at": {"type": "string", "format": "date-time"},
+    "unit_tests": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "requirement_ids", "system_under_test", "arrange", "act", "assertions", "mocks"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^UT-[A-Z0-9-]+$"},
+          "title": {"type": "string", "minLength": 1},
+          "requirement_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+          "system_under_test": {"type": "string", "minLength": 1},
+          "arrange": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+          "act": {"type": "string", "minLength": 1},
+          "assertions": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["actual", "matcher", "expected"],
+              "properties": {
+                "actual": {"type": "string", "minLength": 1},
+                "matcher": {"type": "string", "minLength": 1},
+                "expected": {}
+              },
+              "additionalProperties": false
+            }
+          },
+          "mocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["target", "reason"],
+              "properties": {
+                "target": {"type": "string", "minLength": 1},
+                "reason": {"type": "string", "minLength": 1}
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "gherkin_scenarios": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "requirement_ids", "given", "when", "then"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^GH-[A-Z0-9-]+$"},
+          "title": {"type": "string", "minLength": 1},
+          "requirement_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+          "given": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+          "when": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+          "then": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["observable", "expected"],
+              "properties": {
+                "observable": {"type": "string", "minLength": 1},
+                "expected": {}
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "generated_files": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["kind", "path", "content"],
+        "properties": {
+          "kind": {"enum": ["vitest", "gherkin", "step-definition"]},
+          "path": {"type": "string", "pattern": "^generated/[A-Za-z0-9._/-]+$"},
+          "content": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

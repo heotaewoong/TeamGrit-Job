@@ -1,0 +1,25 @@
+{
+  "requirement_hash": "a3c0ffee1234",
+  "iteration": 1,
+  "critic_session_id": "critique-a5-final-session",
+  "weaknesses": [
+    {
+      "location": "generated/tests/a3-coupon.test.ts — server-only mock bootstrap",
+      "problem": "Vitest 테스트가 지원되지 않는 세 번째 vi.mock 인자에 의존해 TypeScript 검사 또는 테스트 로드가 실패할 수 있다.",
+      "evidence": "생성 코드는 vi.mock('server-only', () => ({}), { virtual: true })를 호출하지만 Vitest의 vi.mock 공개 호출 형식은 모듈 경로와 선택적 factory/options의 두 인자 형태이며 Jest식 virtual 세 번째 인자를 제공하지 않는다. 프로덕션 coupons.ts는 런타임에 import \"server-only\"를 실행하므로 이 부트스트랩이 깨지면 요구사항 테스트 전체가 수집 전에 중단된다.",
+      "revision_direction": "세 번째 인자를 제거하고 설치된 server-only를 vi.mock('server-only', () => ({}))로 mock한다. 모듈이 테스트 환경에서 해석되지 않는 경우에는 Vitest resolve.alias 또는 테스트 전용 resolveId 설정으로 server-only를 빈 모듈에 매핑하고 테스트 수집까지 실행해 확인한다."
+    },
+    {
+      "location": "generated/tests/a3-coupon.test.ts — 'rejects missing and expired coupons'",
+      "problem": "미존재·만료 쿠폰이 검증 API에서 오류를 반환하는지만 확인하고 실제 주문 결제와 저장이 차단되는지는 확인하지 않는다.",
+      "evidence": "REQ-A3-LOOKUP은 미존재 또는 만료 쿠폰을 결제에 적용할 수 없다고 규정한다. 현재 두 케이스는 validateCouponCode 결과만 assert한다. createCouponOrder의 paymentGateway와 orderRepository 미호출 검증은 최소 주문금액 실패 케이스에만 존재하므로, lookup 실패 후 결제 부수효과가 발생하는 회귀는 이 테스트 묶음이 잡지 못한다.",
+      "revision_direction": "createCouponOrder에 대해 couponRepository가 null을 반환하는 케이스와 expiresAt이 고정 now보다 과거인 쿠폰을 반환하는 케이스를 각각 추가한다. CouponNotFoundError 또는 EXPIRED_COUPON 사유를 검증하고 두 케이스 모두 paymentGateway.requestPayment와 orderRepository.save가 0회인지 assert한다."
+    },
+    {
+      "location": "generated/features/a3-coupon.feature — '최소 주문금액 경계'의 9999원 행 및 generated/steps/a3-coupon.steps.ts의 결과 유형/값 Then",
+      "problem": "1원 부족 실패 행이 상태 400만 확인해 잘못된 실패 원인도 통과시키며, 일반화된 Then이 경계 규칙의 의미를 숨긴다.",
+      "evidence": "iteration-1의 gherkin_scenarios 메타데이터는 9999원 결과에 status 400과 '최소 주문 금액 10,000원 이상이어야 합니다.'를 함께 기대하지만 실제 Feature 예시 행에는 유형 '상태'와 결과값 400만 있다. Step Definition도 '결과 유형'이 할인금액이 아니면 어떤 문자열이든 status 분기로 처리한다. 따라서 미존재, 만료, 할인액 0 등 다른 이유의 400도 REQ-A3-MINIMUM 시나리오를 통과한다.",
+      "revision_direction": "최소금액 성공과 1원 부족 실패를 별도 시나리오로 분리하거나 실패 사유 열을 추가한다. 9999원 행에서는 상태 400과 정확한 최소 주문금액 오류 문구를 전용 Then으로 모두 검증하고, 알 수 없는 결과 유형은 즉시 실패시키도록 분기한다."
+    }
+  ]
+}

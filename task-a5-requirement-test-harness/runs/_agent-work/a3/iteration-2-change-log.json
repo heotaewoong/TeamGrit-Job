@@ -1,0 +1,10 @@
+{
+  "requirement_hash": "a3c0ffee1234",
+  "iteration": 2,
+  "changes": [
+    {"location": "GH-A3-MINIMUM-BELOW and generated/features/a3-coupon.feature", "before": "9999원 Feature 예시는 상태 400만 고정하고 정확한 오류 문구를 실행 단계에서 확인하지 않았다.", "after": "9999원 시나리오를 독립 분리하고 상태 400과 '최소 주문 금액 10,000원 이상이어야 합니다.'를 모두 검증한다.", "rationale": ["iteration-1 priority fix", "REQ-A3-MINIMUM의 거절 결과를 모호하지 않게 고정"]},
+    {"location": "generated/features/a3-coupon.feature", "before": "Feature 시나리오와 metadata ID/requirement ID의 기계적 연결 태그가 없었다.", "after": "모든 시나리오와 시나리오 개요에 @test_id=<GH-ID> 및 @requirement_id=<REQ-ID> 태그를 추가했다.", "rationale": ["iteration-1 priority fix", "Feature-메타데이터 추적성 강화"]},
+    {"location": "generated/cucumber.mjs", "before": "loader에는 참고 명령만 있었고 Feature·Step Definition 경로를 묶는 실행 config 산출물이 없었다.", "after": "Feature/Step 경로와 progress formatter를 고정한 Cucumber config 및 server-only loader를 preload하는 전체 실행 명령을 추가했다.", "rationale": ["실행 명령/로더 추적을 산출물 내부에서 재현", "undefined step과 server-only 로드 경로를 함께 고정"]},
+    {"location": "generated/steps/a3-coupon.steps.ts", "before": "최소금액 경계가 결과 유형/값 공용 Step에 의존했다.", "after": "성공 금액과 실패 상태·정확한 사유를 각각 관찰하는 전용 Then을 Feature와 일치시켰다.", "rationale": ["metadata와 실행 파일의 관찰값 일치"]}
+  ]
+}

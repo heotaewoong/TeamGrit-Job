@@ -1,0 +1,12 @@
+{
+  "requirement_hash": "a4c0ffee1234",
+  "iteration": 1,
+  "changes": [
+    {"location": "generated/support/server-only-loader.mjs and generated/tests/a4-coupon-flow.test.ts", "before": "프로덕션 coupons.ts의 server-only import를 일반 Cucumber/Vitest 런타임에서 처리하는 경로가 없었다.", "after": "Cucumber용 테스트 전용 ESM resolver와 Vitest virtual marker mock을 추가하고 실제 도메인 모듈 export를 확인한다.", "rationale": ["서버 표식 때문에 로드 단계에서 실패할 위험 제거", "쿠폰 함수 자체는 mock하지 않는다."]},
+    {"location": "A-4 Feature/Step Then", "before": "validateCouponCode 성공을 주문 승인이라고 표현했다.", "after": "Then을 '쿠폰 적용이 성공한다'로 바꾸고 실제 CouponValidationSuccess의 coupon.code, discountAmount, finalAmount를 검증한다.", "rationale": ["현재 SUT에는 주문·결제 승인 상태가 없다.", "관찰하지 않은 주문 승인을 과장하지 않는다."]},
+    {"location": "UT-A4-INDEPENDENT and GH-A4-INDEPENDENT", "before": "독립 World 계획이 메타데이터에만 있고 실행 파일에는 없었다.", "after": "Vitest에서 별도 fake client와 호출 기록을 검증하고, Cucumber Before Hook의 WeakSet·초기 호출 0·fake 생성 횟수 1을 실제 Feature Then과 연결했다.", "rationale": ["메타데이터와 실행 산출물 일치", "시나리오별 새 World와 fake를 직접 관찰"]},
+    {"location": "GH-A4-EXPIRED and Step Definition clock", "before": "과거 날짜만 사용하고 시스템 현재 시각을 고정하지 않았다.", "after": "Feature 배경에 2026-08-17T12:00:00+09:00을 명시하고 When 동안 Date를 고정한 뒤 finally에서 복원한다.", "rationale": ["시계 의존 제거", "시나리오 간 전역 Date 오염 방지"]},
+    {"location": "GH-A4-SOURCE and UT-A4-SOURCE-API-BOUNDARY", "before": "Feature가 직접 만든 items를 서버 저장소에서 조회한 값이라고 암묵적으로 과장했다.", "after": "현재 공개 SUT 경계를 validateCouponCode(items, subtotal)로 명시하고, 상위 서버 경계에서 이미 검증되어 전달된 items 합계 12000원이 subtotal 999999원보다 우선함만 검증한다.", "rationale": ["허용된 프로덕션 API에는 장바구니/상품 저장소 조회 경계가 없다.", "존재하지 않는 상위 API를 발명하지 않는다.", "items의 서버 조회 출처 자체는 상위 주문 경계가 제공될 때 별도 인수 테스트가 필요한 NEEDS_HUMAN 범위다."]},
+    {"location": "iteration-1 metadata and generated files", "before": "계획된 독립성 단언과 실제 Feature/테스트 단언이 달랐다.", "after": "각 metadata assertion을 실제 Vitest, Feature, Step Definition의 관찰값과 같은 표현 및 값으로 맞췄다.", "rationale": ["평가의 metadata-실행파일 불일치 지적 해소"]}
+  ]
+}

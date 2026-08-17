@@ -1,0 +1,39 @@
+{
+  "requirement_hash": "a4c0ffee1234",
+  "iteration": 1,
+  "evaluator_session_id": "eval-a5-final-session",
+  "evaluator_model": "gpt-5.6-sol",
+  "scores": {
+    "coverage": 5,
+    "unambiguity": 4,
+    "independence": 5,
+    "executability": 5
+  },
+  "evidence": {
+    "coverage": [
+      "UT-A4-HAPPY-MATRIX/GH-A4-HAPPY와 UT-A4-AUTH-GUARDS/GH-A4-AUTH가 정률·정액 정상 결과 및 코드·로그인 누락을 모두 연결하고, UT-A4-VALIDITY-MATRIX/GH-A4-VALIDITY는 미존재·만료·사용자 한도 도달 세 실패 분기를 모두 고정한다.",
+      "UT-A4-MINIMUM-BOUNDARY/GH-A4-MINIMUM과 UT-A4-MAXIMUM/GH-A4-MAXIMUM이 최소금액 동일·1원 미만·최대 할인 한도 경계를 덮는다.",
+      "UT-A4-SOURCE-API-BOUNDARY/GH-A4-SOURCE는 999999원 클라이언트 subtotal과 12000원 items 합계를 의도적으로 불일치시켜 2400원 할인·9600원 최종액을 확인하고, UT-A4-FAKE-INDEPENDENCE/GH-A4-INDEPENDENT는 새 fake와 새 World 요구를 직접 회귀 검증한다."
+    ],
+    "unambiguity": [
+      "UT-A4-HAPPY-MATRIX, UT-A4-AUTH-GUARDS, UT-A4-VALIDITY-MATRIX, UT-A4-MINIMUM-BOUNDARY, UT-A4-MAXIMUM, UT-A4-SOURCE-API-BOUNDARY는 입력, matcher, 금액·상태·오류·호출 여부의 기대값을 구체적으로 명시한다.",
+      "GH-A4-HAPPY, GH-A4-AUTH, GH-A4-VALIDITY, GH-A4-MAXIMUM, GH-A4-SOURCE의 실제 Feature도 고객이 읽을 수 있는 Given/When/Then과 정확한 금액 또는 실패 사유를 사용한다.",
+      "그러나 GH-A4-MINIMUM의 실제 Scenario Outline은 10000원 행에서 할인액 1000원만 확인하고 최종액 9000원을 생략하며, 9999원 행에서는 status 400만 확인하고 메타데이터에 명시된 '최소 주문 금액 10,000원 이상이어야 합니다.' 오류를 단언하지 않아 5점 기준에는 미달한다."
+    ],
+    "independence": [
+      "UT-A4-HAPPY-MATRIX부터 UT-A4-SOURCE-API-BOUNDARY까지 apply 호출마다 fakeDb가 새 client/query/call history를 만들고 afterEach가 fake timer와 mock을 복원한다.",
+      "UT-A4-FAKE-INDEPENDENCE는 두 client의 비동일성, 첫 fake의 호출 존재, 두 번째 fake의 호출 0회를 직접 비교한다.",
+      "GH-A4-INDEPENDENT의 Before Hook은 WeakSet으로 현재 World가 처음 본 객체임을 확인하고 fromCalls/clientBuilds가 0에서 시작함을 단언하며, 실행 후 clientBuilds 1을 확인한다. 모든 Cucumber 검증은 Background의 고정 시각을 적용하고 finally에서 전역 Date를 복원한다."
+    ],
+    "executability": [
+      "UT-A4-HAPPY-MATRIX부터 UT-A4-FAKE-INDEPENDENCE까지 생성된 Vitest는 프로덕션 validateCouponCode 시그니처와 체인 가능한 Supabase fake를 사용하며 server-only를 테스트 전용 virtual module로 처리한다.",
+      "GH-A4-HAPPY, GH-A4-AUTH, GH-A4-VALIDITY, GH-A4-MINIMUM, GH-A4-MAXIMUM, GH-A4-SOURCE, GH-A4-INDEPENDENT의 실제 Feature 문장마다 일치하는 Given/When/Then 또는 Before 구현이 존재한다.",
+      "server-only-loader.mjs가 Cucumber용 server-only 해석기와 구체적인 node/tsx 실행 명령을 제공하고, Step Definition은 고정 시계 복원, 결과 타입 단언, 호출 횟수와 World 수명 검증까지 구현해 미정의 Step이나 존재하지 않는 프로덕션 API가 없다."
+    ]
+  },
+  "priority_fixes": [
+    "GH-A4-MINIMUM의 Outline을 성공·실패 시나리오로 분리하거나 기대 최종액과 기대 오류 열을 추가해 10000원에서는 discountAmount 1000/finalAmount 9000을, 9999원에서는 status 400/정확한 오류 문구를 모두 단언한다.",
+    "Feature에 @GH-A4-* 및 @REQ-A4-* 태그를 부여해 Scenario Outline 예시 행과 JSON의 scenario_id/requirement_id를 실행 리포트에서도 직접 추적할 수 있게 한다.",
+    "제시된 Vitest·Cucumber 실행 명령을 자동 검증 단계에 연결해 server-only 로더, 고정 시계 복원, GH-A4-INDEPENDENT의 Before Hook이 실제 런타임에서도 함께 동작하는지 확인한다."
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "requirement_hash": "a4c0ffee1234",
+  "iteration": 2,
+  "critic_session_id": "critique-a5-convergence-session",
+  "weaknesses": [
+    {
+      "location": "generated/features/a4-coupon-order.feature — '현재 API 경계에서 서버 신뢰 items 우선' 및 대응 Given/When",
+      "problem": "items가 서버에서 신뢰할 수 있게 조회됐다는 요구의 핵심 출처를 테스트하지 않고 Feature 입력값을 신뢰 데이터로 선언한다.",
+      "evidence": "[실제 수렴 차단 문제] REQ-A4-SOURCE는 클라이언트 subtotal보다 '서버가 신뢰하는' items를 우선하라고 한다. 그러나 Given은 Feature의 6000원과 2개를 그대로 배열로 만들고 trustedTotal도 같은 두 입력의 곱으로 저장하며, When은 이를 validateCouponCode에 직접 전달한다. 현재 프로덕션 API에는 items의 출처나 서버 조회를 관찰할 인자가 없으므로 클라이언트가 동일 배열을 주입해도 시나리오가 통과한다. 계산 우선순위는 증명하지만 신뢰 경계는 증명하지 못한다.",
+      "revision_direction": "상품 식별자를 받아 서버 측 장바구니/상품 저장소에서 단가와 수량을 조회하고 그 결과로 validateCouponCode를 호출하는 상위 경계를 SUT로 제공한다. 테스트는 저장소 호출, 반환 items 합계 12000원, 할인 2400원, 최종액 9600원을 함께 검증해야 한다. 현재 소스 범위를 유지한다면 요구와 시나리오를 '호출자가 전달한 items 우선'으로 좁히고 서버 출처는 미검증으로 명시한다."
+    },
+    {
+      "location": "generated/steps/a4-coupon-order.steps.ts — module-level seen WeakSet 및 clock 함수, generated/cucumber.mjs",
+      "problem": "격리 검증용 레지스트리와 고정 시각이 World 밖의 프로세스 전역 상태를 사용해 병렬 실행 확장 시 상호 간섭 가능성이 있다.",
+      "evidence": "[선택 개선 — 현재 수렴 차단 아님] seen은 모든 시나리오가 공유하는 모듈 전역 WeakSet이고 clock은 비동기 validateCouponCode 실행 동안 globalThis.Date를 교체한다. 다만 제공된 cucumber.mjs에는 병렬 실행 설정이 없어서 기본 직렬 실행에서는 각 World의 필드와 client 클로저가 새로 생성되고 Date도 finally에서 복원되므로 현재 요구 사례 실행을 막지는 않는다.",
+      "revision_direction": "기본 직렬 실행 계약을 cucumber.mjs의 parallel: 0으로 명시하고, Before에서는 현재 World의 초기 필드만 확인해 seen 레지스트리를 제거한다. 장기적으로 validateCouponCode에 now/Clock 주입점을 추가해 World별 시계를 사용하면 globalThis.Date 교체도 제거할 수 있다."
+    },
+    {
+      "location": "generated/features/a4-coupon-order.feature — happy/maximum/source Given의 percentage, fixed, -1 값",
+      "problem": "고객용 Gherkin에 내부 enum과 테스트 전용 센티널을 노출해 '고객이 읽을 수 있는 Given/When/Then' 제약을 약화한다.",
+      "evidence": "[선택 개선 — 현재 수렴 차단 아님] Feature는 쿠폰 종류를 percentage/fixed로 쓰고 최대 한도 없음은 -1원으로 표현한 뒤 Step Definition에서 cap < 0을 null로 변환한다. 단계 매칭과 금액 assertion은 정확하므로 실행 수렴을 막지는 않지만, 고객에게 -1원 한도라는 도메인 개념은 없고 한글 정률/정액 및 '최대 한도 없음'보다 이해하기 어렵다.",
+      "revision_direction": "Feature에는 '정률', '정액', '최대 할인 한도 없음'을 사용하고 Step Definition에서만 이를 percentage/fixed/null로 변환한다. 숫자 한도 시나리오는 별도 고객 문장으로 유지해 -1 센티널을 Feature에서 제거한다."
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "requirement_hash": "a3c0ffee1234",
+  "iteration": 0,
+  "rubric_version": "test-generation-0.1",
+  "weights": {
+    "coverage": 0.35,
+    "unambiguity": 0.25,
+    "independence": 0.2,
+    "executability": 0.2
+  },
+  "scores": {
+    "coverage": 4,
+    "unambiguity": 4,
+    "independence": 4,
+    "executability": 2
+  },
+  "evidence": {
+    "coverage": "UT-A3-PERCENTAGE와 UT-A3-FIXED-PRICE-CAP이 정률 정상값과 상품가 초과 정액 할인 회귀를, UT-A3-MAXIMUM-CAPS와 UT-A3-ZERO-CAP이 숫자 한도와 0원 한도를 각각 고정한다. UT-A3-EMPTY-CODE/UT-A3-UNAUTHENTICATED, UT-A3-NOT-FOUND/UT-A3-EXPIRED, UT-A3-MINIMUM-EQUAL/UT-A3-MINIMUM-MINUS-ONE, UT-A3-USER-USAGE-LIMIT 및 UT-A3-ORDER-REAL-DOMAIN이 일곱 요구사항 ID를 모두 추적한다. 그러나 메타데이터에 있는 GH-A3-EMPTY, GH-A3-AUTH, GH-A3-LOOKUP, GH-A3-EXPIRED는 실제 generated/features/a3-coupon.feature에 출고되지 않아 입력·조회 실패 경로의 실행 가능한 Gherkin 커버리지가 빠졌다.",
+    "unambiguity": "UT-A3-EMPTY-CODE와 UT-A3-UNAUTHENTICATED는 정확한 status/error와 supabase.from 0회를, UT-A3-MINIMUM-MINUS-ONE과 UT-A3-USER-USAGE-LIMIT는 정확한 오류 문구를 명시한다. GH-A3-PERCENTAGE와 GH-A3-FIXED-CAP은 입력 금액, 할인액, 최종액이 구체적이다. 실제 Feature의 GH-A3-MINIMUM-EQUAL 및 GH-A3-USAGE에 해당하는 시나리오는 쿠폰 종류·할인값·로그인/코드 같은 선행 상태를 완결적으로 명시하지 않아 존재하지 않는 Step/World 기본값에 기대게 된다.",
+    "independence": "UT-A3-EXPIRED는 fake timer를 사용하고 afterEach에서 실시간을 복원하며, UT-A3-MINIMUM-EQUAL/UT-A3-MINIMUM-MINUS-ONE에 해당하는 코드도 서로 다른 supabaseFake 인스턴스를 만든다. UT-A3-ORDER-REAL-DOMAIN은 저장소·결제 포트만 테스트별 fake로 만들고 실제 도메인 계산을 호출한다. 반면 GH-A3-MINIMUM-EQUAL과 GH-A3-USAGE를 포함한 Feature에는 시나리오마다 새 World/fake를 만든다는 구현이 없어 Gherkin 순서 독립성을 확인할 수 없다.",
+    "executability": "UT-A3-PERCENTAGE부터 UT-A3-ORDER-REAL-DOMAIN까지 대응하는 Vitest 본문은 실제 API 시그니처와 Supabase 체인을 대체로 맞춘다. GH-A3-PERCENTAGE, GH-A3-FIXED-CAP, GH-A3-ZERO-MAX, GH-A3-MINIMUM-EQUAL, GH-A3-MINIMUM-BELOW, GH-A3-USAGE를 담은 Feature에는 Step Definition 파일이 전혀 생성되지 않아 Cucumber에서 undefined step으로 실행 불가하다. UT-A3-ORDER-REAL-DOMAIN 대응 코드의 orderRepository.save 콜백 매개변수에는 타입 표기가 없어 noImplicitAny 설정에서는 컴파일 실패 가능성도 남는다."
+  },
+  "weighted_total": 3.6,
+  "rubric_verdict": "REJECT",
+  "verdict": "REJECT",
+  "priority_fixes": [
+    "GH-A3-EMPTY, GH-A3-AUTH, GH-A3-LOOKUP, GH-A3-EXPIRED를 실제 Feature에 출고하고, 모든 Feature 문장과 일치하는 Cucumber Step Definition 및 시나리오별 새 World/Supabase fake를 생성한다.",
+    "GH-A3-MINIMUM-EQUAL과 GH-A3-USAGE의 Given에 로그인 사용자, 쿠폰 코드, 쿠폰 종류와 할인값을 명시해 숨은 기본 상태 의존을 제거한다.",
+    "UT-A3-ORDER-REAL-DOMAIN의 save 콜백 매개변수에 Order 타입을 부여하고 strict TypeScript/Vitest 및 Cucumber 실행으로 생성 파일을 검증한다."
+  ],
+  "contract_errors": [
+    "quality: weighted_total 3.6 below rubric gate"
+  ],
+  "evaluator_model": "gpt-5.6-sol",
+  "evaluator_session_id": "eval-a5-independent-session",
+  "evaluated_at": "2026-08-17T03:29:44.565302+00:00"
+}

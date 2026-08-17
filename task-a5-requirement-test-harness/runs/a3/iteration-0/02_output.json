@@ -1,0 +1,632 @@
+{
+  "requirement_hash": "a3c0ffee1234",
+  "iteration": 0,
+  "generator_session_id": "gen-a5-v0-session",
+  "generator_model": "gpt-5.6-sol",
+  "unit_tests": [
+    {
+      "id": "UT-A3-PERCENTAGE",
+      "title": "정률 쿠폰의 할인액과 최종 금액을 계산한다",
+      "requirement_ids": [
+        "REQ-A3-DISCOUNT",
+        "REQ-A3-MOCK"
+      ],
+      "system_under_test": "calculateCouponDiscount",
+      "arrange": [
+        "상품 금액 10000원",
+        "할인율 20%이고 최대 할인 한도가 없는 쿠폰"
+      ],
+      "act": "실제 calculateCouponDiscount를 호출한다.",
+      "assertions": [
+        {
+          "actual": "할인 금액",
+          "matcher": "toBe",
+          "expected": 2000
+        },
+        {
+          "actual": "최종 금액",
+          "matcher": "toBe",
+          "expected": 8000
+        }
+      ],
+      "mocks": []
+    },
+    {
+      "id": "UT-A3-FIXED-PRICE-CAP",
+      "title": "정액 할인액을 상품 금액으로 제한한다",
+      "requirement_ids": [
+        "REQ-A3-DISCOUNT"
+      ],
+      "system_under_test": "calculateCouponDiscount",
+      "arrange": [
+        "상품 금액 10000원",
+        "정액 할인 15000원 쿠폰"
+      ],
+      "act": "실제 calculateCouponDiscount를 호출한다.",
+      "assertions": [
+        {
+          "actual": "할인 금액",
+          "matcher": "toBe",
+          "expected": 10000
+        },
+        {
+          "actual": "최종 금액",
+          "matcher": "toBe",
+          "expected": 0
+        }
+      ],
+      "mocks": []
+    },
+    {
+      "id": "UT-A3-MAXIMUM-CAPS",
+      "title": "정률 할인액을 숫자 최대 할인 한도로 제한한다",
+      "requirement_ids": [
+        "REQ-A3-CAP"
+      ],
+      "system_under_test": "calculateCouponDiscount",
+      "arrange": [
+        "소계 10000원",
+        "할인율 50%",
+        "maximum_discount 2000원"
+      ],
+      "act": "실제 calculateCouponDiscount를 호출한다.",
+      "assertions": [
+        {
+          "actual": "할인 금액",
+          "matcher": "toBe",
+          "expected": 2000
+        }
+      ],
+      "mocks": []
+    },
+    {
+      "id": "UT-A3-ZERO-CAP",
+      "title": "maximum_discount 0을 유효한 한도로 적용한다",
+      "requirement_ids": [
+        "REQ-A3-CAP"
+      ],
+      "system_under_test": "calculateCouponDiscount",
+      "arrange": [
+        "소계 10000원",
+        "할인율 50%",
+        "maximum_discount 0원"
+      ],
+      "act": "실제 calculateCouponDiscount를 호출한다.",
+      "assertions": [
+        {
+          "actual": "할인 금액",
+          "matcher": "toBe",
+          "expected": 0
+        }
+      ],
+      "mocks": []
+    },
+    {
+      "id": "UT-A3-EMPTY-CODE",
+      "title": "빈 쿠폰 코드를 DB 조회 없이 400으로 거절한다",
+      "requirement_ids": [
+        "REQ-A3-INPUT"
+      ],
+      "system_under_test": "validateCouponCode",
+      "arrange": [
+        "공백뿐인 쿠폰 코드",
+        "로그인 사용자",
+        "호출 기록이 가능한 Supabase fake"
+      ],
+      "act": "validateCouponCode를 호출한다.",
+      "assertions": [
+        {
+          "actual": "결과",
+          "matcher": "toEqual",
+          "expected": {
+            "error": "쿠폰 코드를 입력해주세요.",
+            "status": 400
+          }
+        },
+        {
+          "actual": "supabase.from 호출 횟수",
+          "matcher": "toBe",
+          "expected": 0
+        }
+      ],
+      "mocks": [
+        {
+          "target": "SupabaseClient",
+          "reason": "DB 외부 I/O 호출 여부를 관찰하기 위해 fake로 대체"
+        }
+      ]
+    },
+    {
+      "id": "UT-A3-UNAUTHENTICATED",
+      "title": "로그인하지 않은 사용자를 DB 조회 없이 401로 거절한다",
+      "requirement_ids": [
+        "REQ-A3-INPUT"
+      ],
+      "system_under_test": "validateCouponCode",
+      "arrange": [
+        "유효한 형식의 쿠폰 코드",
+        "빈 userId",
+        "호출 기록이 가능한 Supabase fake"
+      ],
+      "act": "validateCouponCode를 호출한다.",
+      "assertions": [
+        {
+          "actual": "결과",
+          "matcher": "toEqual",
+          "expected": {
+            "error": "로그인이 필요합니다.",
+            "status": 401
+          }
+        },
+        {
+          "actual": "supabase.from 호출 횟수",
+          "matcher": "toBe",
+          "expected": 0
+        }
+      ],
+      "mocks": [
+        {
+          "target": "SupabaseClient",
+          "reason": "DB 외부 I/O 호출 여부를 관찰하기 위해 fake로 대체"
+        }
+      ]
+    },
+    {
+      "id": "UT-A3-NOT-FOUND",
+      "title": "존재하지 않는 쿠폰을 404로 거절한다",
+      "requirement_ids": [
+        "REQ-A3-LOOKUP"
+      ],
+      "system_under_test": "validateCouponCode",
+      "arrange": [
+        "쿠폰 조회가 null을 반환하는 Supabase fake",
+        "로그인 사용자와 10000원 소계"
+      ],
+      "act": "validateCouponCode를 호출한다.",
+      "assertions": [
+        {
+          "actual": "결과",
+          "matcher": "toEqual",
+          "expected": {
+            "error": "유효하지 않은 쿠폰 코드입니다.",
+            "status": 404
+          }
+        }
+      ],
+      "mocks": [
+        {
+          "target": "SupabaseClient",
+          "reason": "쿠폰 DB 조회를 결정적으로 재현"
+        }
+      ]
+    },
+    {
+      "id": "UT-A3-EXPIRED",
+      "title": "종료일이 지난 쿠폰을 400으로 거절한다",
+      "requirement_ids": [
+        "REQ-A3-LOOKUP"
+      ],
+      "system_under_test": "validateCouponCode",
+      "arrange": [
+        "현재 시각을 2026-08-17 12:00 KST로 고정",
+        "valid_until이 2026-08-16인 쿠폰"
+      ],
+      "act": "validateCouponCode를 호출한다.",
+      "assertions": [
+        {
+          "actual": "결과",
+          "matcher": "toEqual",
+          "expected": {
+            "error": "만료된 쿠폰입니다.",
+            "status": 400
+          }
+        }
+      ],
+      "mocks": [
+        {
+          "target": "SupabaseClient",
+          "reason": "쿠폰 DB 조회를 결정적으로 재현"
+        },
+        {
+          "target": "system clock",
+          "reason": "만료 판정을 고정"
+        }
+      ]
+    },
+    {
+      "id": "UT-A3-MINIMUM-EQUAL",
+      "title": "주문 금액이 최소 주문금액과 같으면 적용한다",
+      "requirement_ids": [
+        "REQ-A3-MINIMUM"
+      ],
+      "system_under_test": "validateCouponCode",
+      "arrange": [
+        "최소 주문금액 10000원인 정액 1000원 쿠폰",
+        "주문 소계 10000원",
+        "사용 횟수 0회"
+      ],
+      "act": "validateCouponCode를 호출한다.",
+      "assertions": [
+        {
+          "actual": "할인 금액",
+          "matcher": "toBe",
+          "expected": 1000
+        },
+        {
+          "actual": "최종 금액",
+          "matcher": "toBe",
+          "expected": 9000
+        }
+      ],
+      "mocks": [
+        {
+          "target": "SupabaseClient",
+          "reason": "쿠폰 및 사용 내역 DB 조회를 결정적으로 재현"
+        }
+      ]
+    },
+    {
+      "id": "UT-A3-MINIMUM-MINUS-ONE",
+      "title": "주문 금액이 최소 주문금액보다 1원 부족하면 거절한다",
+      "requirement_ids": [
+        "REQ-A3-MINIMUM"
+      ],
+      "system_under_test": "validateCouponCode",
+      "arrange": [
+        "최소 주문금액 10000원인 쿠폰",
+        "주문 소계 9999원"
+      ],
+      "act": "validateCouponCode를 호출한다.",
+      "assertions": [
+        {
+          "actual": "결과",
+          "matcher": "toEqual",
+          "expected": {
+            "error": "최소 주문 금액 10,000원 이상이어야 합니다.",
+            "status": 400
+          }
+        }
+      ],
+      "mocks": [
+        {
+          "target": "SupabaseClient",
+          "reason": "쿠폰 DB 조회를 결정적으로 재현"
+        }
+      ]
+    },
+    {
+      "id": "UT-A3-USER-USAGE-LIMIT",
+      "title": "사용자 사용 횟수가 한도에 도달하면 거절한다",
+      "requirement_ids": [
+        "REQ-A3-USAGE"
+      ],
+      "system_under_test": "validateCouponCode",
+      "arrange": [
+        "user_usage_limit 1인 쿠폰",
+        "해당 사용자의 사용 횟수 1회"
+      ],
+      "act": "validateCouponCode를 호출한다.",
+      "assertions": [
+        {
+          "actual": "결과",
+          "matcher": "toEqual",
+          "expected": {
+            "error": "이미 사용 한도를 채운 쿠폰입니다.",
+            "status": 400
+          }
+        }
+      ],
+      "mocks": [
+        {
+          "target": "SupabaseClient",
+          "reason": "쿠폰 및 사용자 사용 횟수 DB 조회를 결정적으로 재현"
+        }
+      ]
+    },
+    {
+      "id": "UT-A3-ORDER-REAL-DOMAIN",
+      "title": "주문 서비스가 실제 할인 계산 결과로 결제와 저장을 요청한다",
+      "requirement_ids": [
+        "REQ-A3-DISCOUNT",
+        "REQ-A3-MOCK"
+      ],
+      "system_under_test": "createCouponOrder",
+      "arrange": [
+        "10000원 상품과 20% 정률 쿠폰",
+        "쿠폰 저장소·결제사·주문 저장소 fake",
+        "현재 시각 고정"
+      ],
+      "act": "createCouponOrder를 호출한다.",
+      "assertions": [
+        {
+          "actual": "결제 요청 금액",
+          "matcher": "toBe",
+          "expected": 8000
+        },
+        {
+          "actual": "저장 주문 할인 금액",
+          "matcher": "toBe",
+          "expected": 2000
+        },
+        {
+          "actual": "저장 주문 상태",
+          "matcher": "toBe",
+          "expected": "PAID"
+        }
+      ],
+      "mocks": [
+        {
+          "target": "CouponRepository",
+          "reason": "Supabase DB 외부 I/O 대체"
+        },
+        {
+          "target": "PaymentGateway",
+          "reason": "외부 결제 API 대체"
+        },
+        {
+          "target": "OrderRepository",
+          "reason": "Supabase DB 외부 I/O 대체"
+        }
+      ]
+    }
+  ],
+  "gherkin_scenarios": [
+    {
+      "id": "GH-A3-PERCENTAGE",
+      "title": "정률 쿠폰 할인",
+      "requirement_ids": [
+        "REQ-A3-DISCOUNT"
+      ],
+      "given": [
+        "상품 금액은 10000원이다",
+        "쿠폰은 20% 정률 할인이고 최대 할인 한도는 없다"
+      ],
+      "when": [
+        "쿠폰 할인 금액을 계산한다"
+      ],
+      "then": [
+        {
+          "observable": "할인 금액",
+          "expected": 2000
+        },
+        {
+          "observable": "최종 결제 금액",
+          "expected": 8000
+        }
+      ]
+    },
+    {
+      "id": "GH-A3-FIXED-CAP",
+      "title": "상품가보다 큰 정액 할인",
+      "requirement_ids": [
+        "REQ-A3-DISCOUNT"
+      ],
+      "given": [
+        "상품 금액은 10000원이다",
+        "쿠폰은 15000원 정액 할인이다"
+      ],
+      "when": [
+        "쿠폰 할인 금액을 계산한다"
+      ],
+      "then": [
+        {
+          "observable": "할인 금액",
+          "expected": 10000
+        },
+        {
+          "observable": "최종 결제 금액",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "id": "GH-A3-ZERO-MAX",
+      "title": "0원 최대 할인 한도",
+      "requirement_ids": [
+        "REQ-A3-CAP"
+      ],
+      "given": [
+        "소계는 10000원이다",
+        "쿠폰은 50% 정률 할인이고 maximum_discount는 0원이다"
+      ],
+      "when": [
+        "쿠폰 할인 금액을 계산한다"
+      ],
+      "then": [
+        {
+          "observable": "할인 금액",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "id": "GH-A3-EMPTY",
+      "title": "빈 쿠폰 코드",
+      "requirement_ids": [
+        "REQ-A3-INPUT"
+      ],
+      "given": [
+        "고객은 로그인했다",
+        "쿠폰 코드는 공백뿐이다"
+      ],
+      "when": [
+        "쿠폰을 검증한다"
+      ],
+      "then": [
+        {
+          "observable": "HTTP 상태",
+          "expected": 400
+        },
+        {
+          "observable": "실패 사유",
+          "expected": "쿠폰 코드를 입력해주세요."
+        },
+        {
+          "observable": "DB 조회 횟수",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "id": "GH-A3-AUTH",
+      "title": "비로그인 고객",
+      "requirement_ids": [
+        "REQ-A3-INPUT"
+      ],
+      "given": [
+        "고객은 로그인하지 않았다",
+        "쿠폰 코드가 입력되어 있다"
+      ],
+      "when": [
+        "쿠폰을 검증한다"
+      ],
+      "then": [
+        {
+          "observable": "HTTP 상태",
+          "expected": 401
+        },
+        {
+          "observable": "실패 사유",
+          "expected": "로그인이 필요합니다."
+        },
+        {
+          "observable": "DB 조회 횟수",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "id": "GH-A3-LOOKUP",
+      "title": "존재하지 않는 쿠폰",
+      "requirement_ids": [
+        "REQ-A3-LOOKUP"
+      ],
+      "given": [
+        "고객은 로그인했다",
+        "DB에 해당 쿠폰이 없다"
+      ],
+      "when": [
+        "쿠폰을 검증한다"
+      ],
+      "then": [
+        {
+          "observable": "HTTP 상태",
+          "expected": 404
+        },
+        {
+          "observable": "실패 사유",
+          "expected": "유효하지 않은 쿠폰 코드입니다."
+        }
+      ]
+    },
+    {
+      "id": "GH-A3-EXPIRED",
+      "title": "만료된 쿠폰",
+      "requirement_ids": [
+        "REQ-A3-LOOKUP"
+      ],
+      "given": [
+        "현재는 2026-08-17 12:00 KST이다",
+        "쿠폰 종료일은 2026-08-16이다"
+      ],
+      "when": [
+        "쿠폰을 검증한다"
+      ],
+      "then": [
+        {
+          "observable": "HTTP 상태",
+          "expected": 400
+        },
+        {
+          "observable": "실패 사유",
+          "expected": "만료된 쿠폰입니다."
+        }
+      ]
+    },
+    {
+      "id": "GH-A3-MINIMUM-EQUAL",
+      "title": "최소 주문금액과 같은 주문",
+      "requirement_ids": [
+        "REQ-A3-MINIMUM"
+      ],
+      "given": [
+        "쿠폰 최소 주문금액은 10000원이다",
+        "주문 금액은 10000원이다"
+      ],
+      "when": [
+        "쿠폰을 검증한다"
+      ],
+      "then": [
+        {
+          "observable": "할인 금액",
+          "expected": 1000
+        },
+        {
+          "observable": "최종 결제 금액",
+          "expected": 9000
+        }
+      ]
+    },
+    {
+      "id": "GH-A3-MINIMUM-BELOW",
+      "title": "최소 주문금액보다 1원 부족한 주문",
+      "requirement_ids": [
+        "REQ-A3-MINIMUM"
+      ],
+      "given": [
+        "쿠폰 최소 주문금액은 10000원이다",
+        "주문 금액은 9999원이다"
+      ],
+      "when": [
+        "쿠폰을 검증한다"
+      ],
+      "then": [
+        {
+          "observable": "HTTP 상태",
+          "expected": 400
+        },
+        {
+          "observable": "실패 사유",
+          "expected": "최소 주문 금액 10,000원 이상이어야 합니다."
+        }
+      ]
+    },
+    {
+      "id": "GH-A3-USAGE",
+      "title": "사용자 사용 한도 도달",
+      "requirement_ids": [
+        "REQ-A3-USAGE"
+      ],
+      "given": [
+        "쿠폰의 사용자 사용 한도는 1회이다",
+        "고객은 이 쿠폰을 1회 사용했다"
+      ],
+      "when": [
+        "쿠폰을 검증한다"
+      ],
+      "then": [
+        {
+          "observable": "HTTP 상태",
+          "expected": 400
+        },
+        {
+          "observable": "실패 사유",
+          "expected": "이미 사용 한도를 채운 쿠폰입니다."
+        }
+      ]
+    }
+  ],
+  "generated_files": [
+    {
+      "kind": "vitest",
+      "path": "generated/tests/a3-coupon.test.ts",
+      "content": "import { afterEach, describe, expect, it, vi } from 'vitest';\nimport { calculateCouponDiscount as calculatePublicDiscount, validateCouponCode } from '../../../task-a3-unit-tests/real/lib/coupons';\nimport { createCouponOrder } from '../../../task-a3-unit-tests/src/services/createCouponOrder';\nimport type { Coupon } from '../../../task-a3-unit-tests/src/domain/coupon';\n\nconst baseRecord = {\n  id: 'coupon-1', code: 'SAVE', name: 'Save', description: null,\n  discount_type: 'fixed', discount_value: 1000, minimum_amount: 0,\n  maximum_discount: null, usage_limit: null, usage_count: 0,\n  user_usage_limit: 1, valid_from: null, valid_until: null, is_active: true,\n  applies_to_product_id: null,\n};\n\nfunction supabaseFake(data: any, usageCount = 0) {\n  const couponQuery: any = {};\n  couponQuery.select = vi.fn(() => couponQuery);\n  couponQuery.eq = vi.fn(() => couponQuery);\n  couponQuery.maybeSingle = vi.fn().mockResolvedValue({ data, error: null });\n  let usageEqCount = 0;\n  const usageQuery: any = {};\n  usageQuery.select = vi.fn(() => usageQuery);\n  usageQuery.eq = vi.fn(() => {\n    usageEqCount += 1;\n    return usageEqCount === 2 ? Promise.resolve({ count: usageCount, error: null }) : usageQuery;\n  });\n  const from = vi.fn((table: string) => table === 'coupons' ? couponQuery : usageQuery);\n  return { client: { from } as any, from };\n}\n\nafterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });\n\ndescribe('A-3 coupon requirements', () => {\n  it('calculates percentage and fixed discounts without exceeding the price', () => {\n    expect(calculatePublicDiscount({ discount_type: 'percentage', discount_value: 20, maximum_discount: null }, 10000)).toBe(2000);\n    expect(calculatePublicDiscount({ discount_type: 'fixed', discount_value: 15000, maximum_discount: null }, 10000)).toBe(10000);\n  });\n\n  it('applies numeric maximum_discount including zero', () => {\n    expect(calculatePublicDiscount({ discount_type: 'percentage', discount_value: 50, maximum_discount: 2000 }, 10000)).toBe(2000);\n    expect(calculatePublicDiscount({ discount_type: 'percentage', discount_value: 50, maximum_discount: 0 }, 10000)).toBe(0);\n  });\n\n  it.each([\n    ['   ', 'user-1', { error: '쿠폰 코드를 입력해주세요.', status: 400 }],\n    ['SAVE', '', { error: '로그인이 필요합니다.', status: 401 }],\n  ])('rejects invalid input without DB lookup', async (code, userId, expected) => {\n    const from = vi.fn();\n    await expect(validateCouponCode({ supabase: { from } as any, code, subtotal: 10000, userId })).resolves.toEqual(expected);\n    expect(from).not.toHaveBeenCalled();\n  });\n\n  it('rejects a coupon that does not exist', async () => {\n    const { client } = supabaseFake(null);\n    await expect(validateCouponCode({ supabase: client, code: 'NONE', subtotal: 10000, userId: 'user-1' })).resolves.toEqual({ error: '유효하지 않은 쿠폰 코드입니다.', status: 404 });\n  });\n\n  it('rejects an expired coupon at a fixed time', async () => {\n    vi.useFakeTimers();\n    vi.setSystemTime(new Date('2026-08-17T12:00:00+09:00'));\n    const { client } = supabaseFake({ ...baseRecord, valid_until: '2026-08-16' });\n    await expect(validateCouponCode({ supabase: client, code: 'SAVE', subtotal: 10000, userId: 'user-1' })).resolves.toEqual({ error: '만료된 쿠폰입니다.', status: 400 });\n  });\n\n  it('accepts minimum amount equality and rejects one won below', async () => {\n    const equal = supabaseFake({ ...baseRecord, minimum_amount: 10000 });\n    const accepted = await validateCouponCode({ supabase: equal.client, code: 'SAVE', subtotal: 10000, userId: 'user-1' });\n    expect(accepted).toMatchObject({ discountAmount: 1000, finalAmount: 9000 });\n\n    const below = supabaseFake({ ...baseRecord, minimum_amount: 10000 });\n    await expect(validateCouponCode({ supabase: below.client, code: 'SAVE', subtotal: 9999, userId: 'user-1' })).resolves.toEqual({ error: '최소 주문 금액 10,000원 이상이어야 합니다.', status: 400 });\n  });\n\n  it('rejects when the user usage count reaches user_usage_limit', async () => {\n    const { client } = supabaseFake({ ...baseRecord, user_usage_limit: 1 }, 1);\n    await expect(validateCouponCode({ supabase: client, code: 'SAVE', subtotal: 10000, userId: 'user-1' })).resolves.toEqual({ error: '이미 사용 한도를 채운 쿠폰입니다.', status: 400 });\n  });\n\n  it('uses the real domain calculation while mocking only external ports', async () => {\n    const coupon: Coupon = { code: 'P20', type: 'PERCENTAGE', value: 20, minOrderAmount: 0, expiresAt: new Date('2026-12-31T00:00:00Z'), isActive: true };\n    const couponRepository = { findByCode: vi.fn().mockResolvedValue(coupon) };\n    const paymentGateway = { requestPayment: vi.fn().mockResolvedValue({ approved: true, approvedAmount: 8000 }) };\n    const orderRepository = { save: vi.fn(async (order) => order) };\n    const order = await createCouponOrder({ orderId: 'order-1', productCode: 'P1', productPrice: 10000, couponCode: 'P20', now: new Date('2026-08-17T00:00:00Z'), couponRepository, paymentGateway, orderRepository });\n    expect(paymentGateway.requestPayment).toHaveBeenCalledWith({ orderId: 'order-1', amount: 8000 });\n    expect(order).toMatchObject({ discountAmount: 2000, finalAmount: 8000, status: 'PAID', downloadGranted: true });\n  });\n});\n"
+    },
+    {
+      "kind": "gherkin",
+      "path": "generated/features/a3-coupon.feature",
+      "content": "# language: ko\n기능: 쿠폰 할인 규칙\n\n  시나리오: 20퍼센트 정률 할인\n    조건 상품 금액은 10000원이다\n    그리고 쿠폰은 20퍼센트 정률 할인이다\n    만일 할인 금액을 계산하면\n    그러면 할인 금액은 2000원이다\n    그리고 최종 결제 금액은 8000원이다\n\n  시나리오: 상품가보다 큰 정액 할인\n    조건 상품 금액은 10000원이다\n    그리고 쿠폰은 15000원 정액 할인이다\n    만일 할인 금액을 계산하면\n    그러면 할인 금액은 10000원이다\n    그리고 최종 결제 금액은 0원이다\n\n  시나리오: 0원 최대 할인 한도\n    조건 상품 금액은 10000원이다\n    그리고 쿠폰은 50퍼센트 정률 할인이고 최대 할인 한도는 0원이다\n    만일 할인 금액을 계산하면\n    그러면 할인 금액은 0원이다\n\n  시나리오: 최소 주문금액과 정확히 같은 주문\n    조건 쿠폰 최소 주문금액은 10000원이다\n    그리고 주문 금액은 10000원이다\n    만일 쿠폰을 검증하면\n    그러면 할인 금액은 1000원이다\n    그리고 최종 결제 금액은 9000원이다\n\n  시나리오: 최소 주문금액보다 1원 부족한 주문\n    조건 쿠폰 최소 주문금액은 10000원이다\n    그리고 주문 금액은 9999원이다\n    만일 쿠폰을 검증하면\n    그러면 상태는 400이다\n    그리고 실패 사유는 \"최소 주문 금액 10,000원 이상이어야 합니다.\"이다\n\n  시나리오: 사용자 사용 한도에 도달한 쿠폰\n    조건 사용자 사용 한도는 1회이다\n    그리고 고객의 사용 횟수는 1회이다\n    만일 쿠폰을 검증하면\n    그러면 상태는 400이다\n    그리고 실패 사유는 \"이미 사용 한도를 채운 쿠폰입니다.\"이다\n"
+    }
+  ],
+  "packaged_at": "2026-08-17T03:29:44.533242+00:00"
+}

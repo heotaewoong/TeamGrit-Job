@@ -1,13 +1,15 @@
 {
-  "name": "heobrain-coupon-order-test",
+  "name": "teamgrit-phase1-test-engineering",
   "private": true,
   "type": "module",
   "version": "0.1.0",
-  "description": "HeoBrain Store - 쿠폰 적용 주문 결제 흐름 단위테스트/인수테스트 (Task A-3, A-4)",
+  "description": "TeamGrit Phase 1 A-3 단위 테스트, A-4 BDD, A-5 요구사항-테스트 하네스",
   "scripts": {
-    "test": "vitest run",
+    "test": "npm run test:a3 && npm run test:a4",
+    "test:a3": "vitest run task-a3-unit-tests",
+    "test:a4": "node --import tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js",
     "test:watch": "vitest",
-    "test:bdd": "node --import tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js"
+    "test:bdd": "npm run test:a4"
   },
   "devDependencies": {
     "@cucumber/cucumber": "^13.2.1",

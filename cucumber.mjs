@@ -3,7 +3,7 @@
 // @cucumber/cucumber(Cucumber.js)를 사용한다 — A-3에서 JUnit5 대신 Vitest를 쓴 것과
 // 동일한 논리(스택만 다를 뿐 Given/When/Then, Step Definition 개념은 동일).
 export default {
-  import: ["real/features/step_definitions/**/*.ts"],
-  paths: ["real/features"],
+  import: ["task-a4-bdd-tests/real/features/step_definitions/**/*.ts"],
+  paths: ["task-a4-bdd-tests/real/features"],
   format: ["summary", "progress-bar"],
 };

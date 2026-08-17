@@ -1,0 +1,35 @@
+{
+  "requirement_hash": "a3c0ffee1234",
+  "iteration": 2,
+  "evaluator_session_id": "eval-a5-convergence-session",
+  "evaluator_model": "gpt-5.6-sol",
+  "scores": {
+    "coverage": 5,
+    "unambiguity": 5,
+    "independence": 5,
+    "executability": 5
+  },
+  "evidence": {
+    "coverage": [
+      "UT-A3-DISCOUNT-MATRIX/GH-A3-DISCOUNT가 정률 정상값과 상품가를 넘는 정액 할인을, UT-A3-MAXIMUM-MATRIX/GH-A3-MAXIMUM이 정률·정액 각각의 2000원 및 0원 maximum_discount 회귀를 연결한다.",
+      "UT-A3-INPUT-GUARDS와 GH-A3-EMPTY/GH-A3-AUTH, UT-A3-LOOKUP-FAILURES와 GH-A3-NOT-FOUND/GH-A3-EXPIRED, UT-A3-USAGE-LIMIT/GH-A3-USAGE가 입력·조회·사용 한도 실패를 정확히 추적한다.",
+      "UT-A3-MINIMUM-EQUAL/UT-A3-MINIMUM-BELOW와 GH-A3-MINIMUM-EQUAL/GH-A3-MINIMUM-BELOW가 최소금액 동일 및 1원 미만을 별도 회귀로 고정하고, UT-A3-ORDER-REAL-DOMAIN은 외부 포트만 fake로 두고 실제 핵심 계산을 실행해 모든 요구사항 ID를 필요한 정상·실패·경계·회귀에 연결한다."
+    ],
+    "unambiguity": [
+      "UT-A3-DISCOUNT-MATRIX부터 UT-A3-USAGE-LIMIT까지 입력, 관찰 대상, Vitest matcher, 수치 또는 정확한 status/error를 명시하며 UT-A3-ORDER-REAL-DOMAIN은 결제 요청 8000원, 할인 2000원, PAID 상태를 고정한다.",
+      "GH-A3-EMPTY/GH-A3-AUTH는 status/error와 DB 조회 0회를, GH-A3-NOT-FOUND/GH-A3-EXPIRED/GH-A3-USAGE는 정확한 실패 결과를 명시한다.",
+      "GH-A3-MINIMUM-EQUAL은 할인 1000원과 최종액 9000원을 모두 단언하고 GH-A3-MINIMUM-BELOW는 status 400과 '최소 주문 금액 10,000원 이상이어야 합니다.'를 함께 단언한다. 각 Feature 시나리오에는 test_id와 requirement_id 태그가 있어 JSON 메타데이터와 실행 결과의 대응도 명확하다."
+    ],
+    "independence": [
+      "UT-A3-INPUT-GUARDS는 각 행에 새 vi.fn을 만들고 조회·경계·사용 한도 테스트는 호출마다 새 db/row 객체를 생성하며 afterEach가 fake timer와 mock을 복원한다.",
+      "GH-A3-EMPTY부터 GH-A3-USAGE까지 Cucumber가 시나리오마다 새 W 인스턴스를 만들고 W.client()가 매 호출마다 새 쿠폰·사용내역 query fake와 독립 fromCalls를 생성한다.",
+      "모든 시간 의존 Gherkin 시나리오는 명시된 ISO 시각을 사용하고 쿠폰 검증 Step의 finally에서 전역 Date를 복원하므로 실행 순서·실시간·네트워크 의존이 남지 않는다."
+    ],
+    "executability": [
+      "UT-A3-DISCOUNT-MATRIX부터 UT-A3-ORDER-REAL-DOMAIN까지 생성 Vitest는 현재 프로덕션의 calculateCouponDiscount, validateCouponCode, createCouponOrder 시그니처와 일치하고 Order 타입으로 외부 저장 fake도 엄격히 타입화한다.",
+      "GH-A3-DISCOUNT, GH-A3-MAXIMUM, GH-A3-EMPTY, GH-A3-AUTH, GH-A3-NOT-FOUND, GH-A3-EXPIRED, GH-A3-MINIMUM-EQUAL, GH-A3-MINIMUM-BELOW, GH-A3-USAGE의 모든 실제 Feature 문장에 일치하는 Step Definition이 존재한다.",
+      "server-only-loader.mjs와 generated/cucumber.mjs가 프로덕션의 server-only 표식을 처리하고 Feature/Step 경로와 실행 명령을 완결한다. 정액 maximum_discount 행이 현재 소스의 요구사항 결함을 드러내 실패할 수 있는 것은 테스트 실행 불가능성이 아니라 의도된 회귀 검출이다."
+    ]
+  },
+  "priority_fixes": []
+}

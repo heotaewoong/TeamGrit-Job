@@ -1,0 +1,15 @@
+{
+  "requirement_hash": "a4c0ffee1234",
+  "task": "A-4 쿠폰 적용 주문 흐름 BDD 인수 테스트 생성",
+  "iteration": 2,
+  "max_iterations": 2,
+  "generator_session_id": "gen-a5-refine-2-session",
+  "critic_session_id": "critique-a5-convergence-session",
+  "evaluator_session_id": "eval-a5-convergence-session",
+  "weighted_total": 5.0,
+  "rubric_verdict": "PASS",
+  "contract_verdict": "PASS",
+  "contract_errors": [],
+  "converged": true,
+  "recorded_at": "2026-08-17T03:50:19.187364+00:00"
+}

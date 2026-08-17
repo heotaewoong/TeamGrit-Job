@@ -1,0 +1,31 @@
+{
+  "requirement_hash": "a4c0ffee1234",
+  "iteration": 2,
+  "rubric_version": "test-generation-0.1",
+  "weights": {
+    "coverage": 0.35,
+    "unambiguity": 0.25,
+    "independence": 0.2,
+    "executability": 0.2
+  },
+  "scores": {
+    "coverage": 5,
+    "unambiguity": 5,
+    "independence": 5,
+    "executability": 5
+  },
+  "evidence": {
+    "coverage": "UT-A4-HAPPY-MATRIX/GH-A4-HAPPY가 정률 20%와 정액 1500원 정상 결과를, UT-A4-AUTH-GUARDS/GH-A4-AUTH가 코드·로그인 누락 및 DB 미조회를, UT-A4-VALIDITY-MATRIX/GH-A4-VALIDITY가 미존재·만료·사용 한도 도달 세 실패 경로를 모두 연결한다. UT-A4-MINIMUM-EQUAL/UT-A4-MINIMUM-BELOW와 GH-A4-MINIMUM-EQUAL/GH-A4-MINIMUM-BELOW가 최소금액 동일·1원 미만 경계를 별도 회귀로 고정하고 UT-A4-MAXIMUM/GH-A4-MAXIMUM이 최대 할인 한도를 검증한다. UT-A4-SOURCE-API-BOUNDARY/GH-A4-SOURCE는 999999원 subtotal과 12000원 items를 의도적으로 불일치시켜 items 우선을 검증하고, UT-A4-INDEPENDENT-RUNTIME/GH-A4-INDEPENDENT는 fake와 World 격리를 직접 관찰해 여섯 요구사항 ID 모두를 필요한 정상·실패·경계·회귀에 연결한다.",
+    "unambiguity": "UT-A4-HAPPY-MATRIX부터 UT-A4-SOURCE-API-BOUNDARY까지 입력, 관찰 대상, matcher, 정확한 할인·최종 금액 또는 status/error/호출 횟수를 명시한다. GH-A4-HAPPY, GH-A4-AUTH, GH-A4-VALIDITY, GH-A4-MAXIMUM, GH-A4-SOURCE의 실제 Feature는 고객이 읽을 수 있는 Given/When/Then과 행별 수치·오류를 사용하고 각 시나리오에 test_id/requirement_id 태그를 둔다. GH-A4-MINIMUM-EQUAL은 성공, 할인 1000원, 최종액 9000원을 함께 단언하고 GH-A4-MINIMUM-BELOW는 status 400과 '최소 주문 금액 10,000원 이상이어야 합니다.'를 함께 단언한다. GH-A4-INDEPENDENT도 fresh World와 fake 생성 횟수 1이라는 관찰 가능한 기대값을 가진다.",
+    "independence": "Vitest의 apply/db는 호출마다 새 client·query·call history를 만들고 UT-A4-INDEPENDENT-RUNTIME 대응 코드는 첫 fake만 호출한 뒤 두 번째 fake의 미호출과 client 비동일성을 직접 확인한다. Cucumber Before Hook은 WeakSet으로 현재 World가 처음 본 객체임을 확인하고 fromCalls가 0에서 시작함을 단언하며, GH-A4-INDEPENDENT 실행 후 현재 World의 clientBuilds가 정확히 1임을 확인한다. 모든 Feature 시나리오는 Background의 고정 ISO 시각을 사용하고 When Step의 finally에서 전역 Date를 복원하며 Supabase는 시나리오별 local fake이므로 시간·네트워크·실행 순서 의존이 남지 않는다.",
+    "executability": "UT-A4-HAPPY-MATRIX부터 UT-A4-INDEPENDENT-RUNTIME까지 생성 Vitest는 현재 validateCouponCode 시그니처와 체인 가능한 Supabase fake를 사용하고 server-only 표식만 vi.mock으로 대체한다. GH-A4-HAPPY, GH-A4-AUTH, GH-A4-VALIDITY, GH-A4-MINIMUM-EQUAL, GH-A4-MINIMUM-BELOW, GH-A4-MAXIMUM, GH-A4-SOURCE, GH-A4-INDEPENDENT의 모든 실제 Feature 문장에 일치하는 Given/When/Then 또는 Before 구현이 존재한다. server-only-loader.mjs와 generated/cucumber.mjs가 프로덕션 모듈 로딩, Feature/Step 경로, node/tsx 실행 명령을 완결하고 Step Definition은 고정 시계 복원·금액·오류·DB 호출·World/fake 수명 단언을 모두 구현한다."
+  },
+  "weighted_total": 5.0,
+  "rubric_verdict": "PASS",
+  "verdict": "PASS",
+  "priority_fixes": [],
+  "contract_errors": [],
+  "evaluator_model": "gpt-5.6-sol",
+  "evaluator_session_id": "eval-a5-convergence-session",
+  "evaluated_at": "2026-08-17T03:50:19.178842+00:00"
+}
